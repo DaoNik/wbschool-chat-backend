@@ -1,0 +1,42 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "'Бэкенд часть чата'",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kkoroleva/WBSchool-chat.git#backend"
+  },
+  "keywords": [
+    "'Node.js",
+    "express",
+    "MongoDb'"
+  ],
+  "author": "Nikita Taranin <nikitataranin@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kkoroleva/WBSchool-chat/issues"
+  },
+  "homepage": "https://github.com/kkoroleva/WBSchool-chat/tree/backend#readme",
+  "devDependencies": {
+    "nodemon": "^2.0.15"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.20.0",
+    "celebrate": "^15.0.1",
+    "dotenv": "^16.0.0",
+    "express": "^4.17.3",
+    "express-rate-limit": "^6.3.0",
+    "express-winston": "^4.2.0",
+    "helmet": "^5.0.2",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^6.2.10",
+    "validator": "^13.7.0",
+    "winston": "^3.7.2"
+  }
+}

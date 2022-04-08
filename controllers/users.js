@@ -14,7 +14,8 @@ const register = (req, res, next) => {
     .hash(password, 12)
     .then((hash) => User.create({email, password: hash, username}))
     .then((user) => {
-      res.send(user.email);
+      const email = user.email;
+      res.send({email});
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -34,7 +35,17 @@ const register = (req, res, next) => {
 
 const login = (req, res, next) => {
   const {emailOrUser, password} = req.body;
-  return User.findOne({emailOrUser})
+  const isEmail = emailOrUser.includes('@');
+
+  function fnEmailOrUser() {
+    if (isEmail) {
+      return {email: emailOrUser};
+    } else {
+      return {username: emailOrUser};
+    }
+  }
+
+  return User.findOne( fnEmailOrUser() )
     .select('+password')
     .then((user) => {
       if (!user) {

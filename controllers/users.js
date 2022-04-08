@@ -14,9 +14,7 @@ const register = (req, res, next) => {
     .hash(password, 12)
     .then((hash) => User.create({email, password: hash, username}))
     .then((user) => {
-      const newUser = user.toObject();
-      delete newUser.password;
-      res.send(newUser);
+      res.send(user.email);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {

@@ -28,6 +28,12 @@ const userSchema = new Schema({
     type: String,
     default: 'basic'
   },
+  about: {
+    type: String,
+    minLength: 2,
+    maxLength: 100,
+    default: 'I use wbshool-chat'
+  },
   avatar: {
     type: String,
     validate: {

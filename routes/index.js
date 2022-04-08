@@ -16,6 +16,7 @@ router.post(
       password: Joi.string().required().min(8).max(100),
       username: Joi.string().required().min(4).max(30),
       userRights: Joi.string().min(2).max(10),
+      about: Joi.string().min(2).max(100),
       avatar: Joi.string().base64()
     })
   }),
@@ -26,7 +27,7 @@ router.post(
   '/signin',
   celebrate({
     body: Joi.object().keys({
-      emailOrUser: Joi.string().required().min(4).max(200),
+      emailOrUser: Joi.string().required().min(4).max(100),
       password: Joi.string().required().min(8).max(100)
     })
   }),

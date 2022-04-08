@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const { celebrate, Joi } = require('celebrate');
-
-
+const messagesRouter = require('./messages');
+const auth = require('../middleware/auth');
 const {register, login} = require('../controllers/users');
 
 router.get('/', (req, res) => {
@@ -33,5 +33,13 @@ router.post(
   }),
   login
 );
+
+router.use(auth);
+
+router.use('/messages', messagesRouter);
+
+router.use((req, res, next) => {
+  next(new NotFoundError('Страница не найдена'))
+})
 
 module.exports = router;

@@ -1,6 +1,7 @@
 const { Schema, model } = require('mongoose');
 const validator = require('validator');
 
+const regexp = /^[a-zA-Z0-9а-яёА-ЯЁ]*[-_— .]?[a-zA-Z0-9а-яёА-ЯЁ]*$/;
 const userSchema = new Schema({
   email: {
     type: String,
@@ -22,7 +23,10 @@ const userSchema = new Schema({
     required: true,
     unique: true,
     minLength: 4,
-    maxLength: 30
+    maxLength: 30,
+    validate: {
+      validator: (value) => regexp.test(value)
+    }
   },
   userRights: {
     type: String,

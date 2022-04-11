@@ -18,7 +18,7 @@ const createMessage = (req, res, next) => {
     })
     .catch(err => {
       if (err.name === 'ValidationError') {
-        return next(new ValidationError('Неверно введены данные для фильма'))
+        return next(new ValidationError('Неверно введены данные для сообщения'))
       }
       return next(err);
     })
@@ -76,7 +76,7 @@ const updateMessage = (req, res, next) => {
       if (err.name === 'ValidationError') {
         next(new ValidationError('Неверно введены данные для текста или файла'))
       } else if (err.name === 'CastError') {
-        next(new ValidationError('Неверный идентификатор пользователя'))
+        next(new ValidationError('Неверный идентификатор сообщения'))
       } else {
         next(err)
       }

@@ -5,6 +5,7 @@ const messageSchema = new Schema({
   text: {
     type: String,
     required: true,
+    minlength: 1,
     maxLength: 1000
   },
   imageOrFile: {

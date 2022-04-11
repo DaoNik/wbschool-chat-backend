@@ -13,7 +13,7 @@ router.post(
   '/',
   celebrate({
     body: Joi.object().keys({
-      text: Joi.string().required().max(1000),
+      text: Joi.string().required().min(1).max(1000),
       imageOrFile: Joi.string().base64()
     })
   }),
@@ -37,7 +37,7 @@ router.patch(
       id: Joi.string().length(24).hex()
     }),
     body: Joi.object().keys({
-      text: Joi.string().max(1000),
+      text: Joi.string().min(1).max(1000),
       imageOrFile: Joi.string().base64()
     })
   }),

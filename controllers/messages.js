@@ -12,7 +12,7 @@ const getMessages = (req, res, next) => {
 
 const createMessage = (req, res, next) => {
   console.log(req.user, req.body);
-  Message.create({...req.body, owner: req.user._id})
+  Message.create({...req.body, expiresIn: Date.now(), owner: req.user._id})
     .then((message) => {
       res.send(message);
     })

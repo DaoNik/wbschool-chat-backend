@@ -14,6 +14,12 @@ const messageSchema = new Schema({
       validator: (value) => validator.isBase64(value)
     }
   },
+  expiresIn: {
+    type: Date,
+    validate: {
+      validator: (v) => validator.isDate(v)
+    }
+  },
   owner: {
     type: Types.ObjectId,
     ref: 'user',

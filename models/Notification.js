@@ -1,4 +1,4 @@
-const {Schema, model} = require('mongoose');
+const {Schema, model, Types} = require('mongoose');
 const validator = require('validator');
 
 const notificationSchema = new Schema({
@@ -7,6 +7,11 @@ const notificationSchema = new Schema({
     validate: {
       validator: (v) => validator.isDate(v)
     }
+  },
+  owner: {
+    type: Types.ObjectId,
+    ref: 'user',
+    required: true
   },
   text: {
     type: String,

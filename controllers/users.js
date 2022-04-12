@@ -4,6 +4,7 @@ const User = require('../models/User');
 const AuthorizationError = require('../errors/AuthorizationError');
 const ValidationError = require('../errors/ValidationError')
 const ConflictError = require("../errors/ConflictError");
+const NotFoundError = require("../errors/NotFoundError");
 
 const { JWT_SECRET = 'secret' } = process.env;
 
@@ -72,6 +73,25 @@ const getUsers = (req, res, next) => {
       res.send(users);
     })
     .catch(next)
+}
+
+const getUser = (req, res, next) => {
+  User.findById(req.user._id)
+    .then((user) => {
+      if (!user) {
+        throw new NotFoundError('Нет пользователя с таким id')
+      }
+      return res.send(user);
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        return next(new ValidationError('Невалидный id пользователя'))
+      }
+      if (err.name === 'NotFoundError') {
+        return next(new NotFoundError('Неверный идентификатор пользоватлея'))
+      }
+      return next(err);
+    })
 }
 
 const updateUser = (req, res, next) => {
@@ -159,4 +179,4 @@ const updateUserPassword = (req, res, next) => {
     })
 }
 
-module.exports = {register, login, getUsers, updateUser, updateUserPassword};
+module.exports = {register, login, getUsers, getUser, updateUser, updateUserPassword};

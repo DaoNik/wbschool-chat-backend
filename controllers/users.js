@@ -5,6 +5,7 @@ const AuthorizationError = require('../errors/AuthorizationError');
 const ValidationError = require('../errors/ValidationError')
 const ConflictError = require("../errors/ConflictError");
 const NotFoundError = require("../errors/NotFoundError");
+const AllowsError = require("../errors/AllowsError");
 
 const { JWT_SECRET = 'secret' } = process.env;
 
@@ -94,6 +95,38 @@ const getUser = (req, res, next) => {
     })
 }
 
+const deleteUser = (req, res, next) => {
+  const { id } = req.params;
+  const { password } = req.body;
+
+  User.findById(id)
+    .select('+password')
+    .then(user => {
+      if (!user) {
+        throw new NotFoundError('Нет пользователя с таким id');
+      }
+      if (id !== req.user._id) {
+        throw new AllowsError('Вы не можете удалить этого пользователя')
+      }
+      return bcrypt.compare(password, user.password)
+        .then((matched) => {
+          if (!matched) {
+            throw new AuthorizationError('Неправильный пароль')
+          }
+          return user;
+        })
+        .then(() => User.findByIdAndDelete(id))
+        .then(() => res.send(id))
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        return next(new ValidationError('Невалидный id пользователя'))
+      }
+
+      return next(err);
+    });
+}
+
 const updateUser = (req, res, next) => {
   const { email, username, about, avatar } = req.body;
 
@@ -179,4 +212,4 @@ const updateUserPassword = (req, res, next) => {
     })
 }
 
-module.exports = {register, login, getUsers, getUser, updateUser, updateUserPassword};
+module.exports = {register, login, getUsers, getUser, deleteUser, updateUser, updateUserPassword};

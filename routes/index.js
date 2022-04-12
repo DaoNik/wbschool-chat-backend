@@ -1,8 +1,10 @@
 const router = require('express').Router();
 const { celebrate, Joi } = require('celebrate');
 const chatsRouter = require('./chats');
+const usersRouter = require('./users');
 const auth = require('../middleware/auth');
 const {register, login} = require('../controllers/users');
+const NotFoundError = require('../errors/NotFoundError')
 
 router.get('/', (req, res) => {
   res.send('Hello');
@@ -36,7 +38,8 @@ router.post(
 
 router.use(auth);
 
-router.use('/chats', chatsRouter)
+router.use('/chats', chatsRouter);
+router.use('/users', usersRouter);
 
 router.use(/.*/, (req, res, next) => {
   next(new NotFoundError('Страница не найдена'));

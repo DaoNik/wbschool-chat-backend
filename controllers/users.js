@@ -66,4 +66,97 @@ const login = (req, res, next) => {
     .catch(next);
 }
 
-module.exports = {register, login}
+const getUsers = (req, res, next) => {
+  User.find({})
+    .then((users) => {
+      res.send(users);
+    })
+    .catch(next)
+}
+
+const updateUser = (req, res, next) => {
+  const { email, username, about, avatar } = req.body;
+
+  return User.findByIdAndUpdate(
+    req.user._id,
+    { email, username, about, avatar },
+    { new: true, runValidators: true }
+  )
+    .then((user) => {
+      if (!user) {
+        throw new NotFoundError('Нет пользователя с таким id');
+      }
+      return res.send(user);
+    })
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        return next(
+          new ValidationError('Неверно введены данные для пользователя')
+        )
+      }
+      if (err.name === 'CastError') {
+        return next(
+          new ValidationError('Неверный идентификатор пользователя')
+        )
+      }
+      if (err.name === 'MongoServerError' && err.code === 11000) {
+        return next(
+          ConflictError('Вы не можете обновить данные другого пользователя')
+        )
+      }
+      return next(err);
+    })
+}
+
+const updateUserPassword = (req, res, next) => {
+  const {email, password, newPassword} = req.body;
+
+  return User.findOne({ email })
+    .select('+password')
+    .then((user) => {
+      if (!user) {
+        throw new AuthorizationError('Неправильные почта или пароль')
+      }
+      return bcrypt.compare(password, user.password)
+        .then((matched) => {
+          if (!matched) {
+            throw new AuthorizationError('Неправильные почта или пароль')
+          }
+          const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
+            expiresIn: '7d'
+          })
+          bcrypt.hash(newPassword, 10)
+            .then((hash) => User.findByIdAndUpdate(
+              user._id,
+              {password: hash },
+              { new: true, runValidators: true }
+            ))
+            .then((user) => {
+              return res.send({token, user})
+            })
+            .catch((err) => {
+              if (err.name === 'MongoServerError' && err.code === 11000) {
+                return next(
+                  new ConflictError('Вы не можете обновить данные другого пользователя')
+                );
+              }
+              return next(err);
+            })
+        })
+    })
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        return next(
+          new ValidationError('Неверно введены данные для пользователя')
+        );
+      }
+      if (err.name === 'MongoServerError' && err.code === 11000) {
+        return next(
+          new ConflictError('Вы не можете обновить данные другого пользователя')
+        );
+      }
+      return next(err);
+    })
+}
+
+module.exports = {register, login, getUsers, updateUser, updateUserPassword};

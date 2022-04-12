@@ -3,6 +3,7 @@ const { celebrate, Joi } = require('celebrate');
 const {
   getUsers,
   getUser,
+  deleteUser,
   updateUser,
   updateUserPassword
 } = require('../controllers/users');
@@ -10,6 +11,19 @@ const {
 router.get('/', getUsers);
 
 router.get('/me', getUser);
+
+router.delete(
+  '/:id',
+  celebrate({
+    params: Joi.object().keys({
+      id: Joi.string().length(24).hex()
+    }),
+    body: Joi.object().keys({
+      password: Joi.string().required().min(8).max(100),
+    })
+  }),
+  deleteUser
+)
 
 router.patch(
   '/me',

@@ -25,7 +25,6 @@ const createChat = (req, res, next) => {
 
 const deleteChat = (req, res, next) => {
   const { id } = req.params;
-
   return Chat.findById(id)
     .then(chat => {
       if (!chat) {
@@ -38,7 +37,7 @@ const deleteChat = (req, res, next) => {
       return chat;
     })
     .then(() => Chat.findByIdAndDelete(id))
-    .then((chat) => res.send(chat))
+    .then(() => res.send(id))
     .catch((err) => {
       if (err.name === 'CastError') {
         return next(new ValidationError('Невалидный id чата'))

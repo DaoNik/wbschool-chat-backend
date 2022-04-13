@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const { celebrate, Joi } = require('celebrate');
 const {
-  getChats,
+  getFriends,
   getGroups,
   createChat,
   deleteChat,
@@ -9,7 +9,7 @@ const {
 } = require('../controllers/chats');
 const messagesRouter = require("./messages");
 
-router.get('/',  getChats);
+router.get('/',  getFriends);
 router.get('/groups', getGroups);
 
 router.post(

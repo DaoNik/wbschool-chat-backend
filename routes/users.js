@@ -7,6 +7,7 @@ const {
   updateUser,
   updateUserPassword
 } = require('../controllers/users');
+const notificationsRouter =require('./notification');
 
 router.get('/', getUsers);
 
@@ -49,5 +50,7 @@ router.patch(
   }),
   updateUserPassword
 )
+
+router.use('/notifications', notificationsRouter);
 
 module.exports = router;

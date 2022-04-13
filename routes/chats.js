@@ -2,6 +2,7 @@ const router = require('express').Router();
 const { celebrate, Joi } = require('celebrate');
 const {
   getChats,
+  getGroups,
   createChat,
   deleteChat,
   updateChat
@@ -9,6 +10,7 @@ const {
 const messagesRouter = require("./messages");
 
 router.get('/',  getChats);
+router.get('/groups', getGroups);
 
 router.post(
   '/',

@@ -4,14 +4,26 @@ const AllowsError = require("../errors/AllowsError");
 
 const getChats = (req, res, next) => {
   Chat.find({})
+    .where('owner')
+    .equals(req.user._id)
     .then((chats) => {
       res.send(chats);
     })
     .catch(next);
 }
 
+const getGroups = (req, res, next) => {
+  Chat.find({})
+    .where('users')
+    .equals(req.user._id)
+    .then((chats) => {
+      res.send(chats);
+    })
+    .catch(next)
+}
+
 const createChat = (req, res, next) => {
-  Chat.create({...req.body, users: [req.user._id, ...req.body.users], owner: req.user._id})
+  Chat.create({...req.body, owner: req.user._id})
     .then((chat) => {
       res.send(chat);
     })
@@ -89,4 +101,4 @@ const updateChat = (req, res, next) => {
     })
 }
 
-module.exports = {getChats, createChat, deleteChat, updateChat};
+module.exports = {getChats, getGroups, createChat, deleteChat, updateChat};

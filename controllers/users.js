@@ -132,7 +132,7 @@ const updateUser = (req, res, next) => {
 
   return User.findByIdAndUpdate(
     req.user._id,
-    { email, username, about, avatar },
+    { email, username, about, avatar, friends },
     { new: true, runValidators: true }
   )
     .then((user) => {

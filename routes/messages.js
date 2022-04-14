@@ -14,7 +14,7 @@ router.post(
   celebrate({
     body: Joi.object().keys({
       text: Joi.string().required().min(1).max(1000),
-      imageOrFile: Joi.string(),
+      imageOrFile: Joi.string().base64(),
     })
   }),
   createMessage
@@ -40,7 +40,7 @@ router.patch(
     }),
     body: Joi.object().keys({
       text: Joi.string().min(1).max(1000),
-      imageOrFile: Joi.string(),
+      imageOrFile: Joi.string().base64(),
       expiresIn: Joi.date()
     })
   }),

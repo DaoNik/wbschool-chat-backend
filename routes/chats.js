@@ -1,17 +1,18 @@
 const router = require('express').Router();
-const { celebrate, Joi } = require('celebrate');
+const {celebrate, Joi} = require('celebrate');
 const {
   getFriends,
   getGroups,
   createChat,
   deleteChat,
-  updateChat
+  updateChat,
+  getChat,
 } = require('../controllers/chats');
 const messagesRouter = require("./messages");
 
-router.get('/',  getFriends);
+router.get('/', getFriends);
 router.get('/groups', getGroups);
-
+router.get('/:id', getChat)
 router.post(
   '/',
   celebrate({
@@ -57,6 +58,12 @@ router.patch(
   updateChat
 )
 
-router.use('/:id/messages', messagesRouter);
+// router.use('/:id/messages', celebrate({
+//   params: Joi.object().keys({
+//     id: Joi.string().length(24).hex()
+//   })
+// }), messagesRouter);
+
+router.use('/', messagesRouter);
 
 module.exports = router;

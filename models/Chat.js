@@ -43,7 +43,12 @@ const chatSchema = new Schema({
     type: Types.ObjectId,
     ref: 'user',
     required: true
-  }
+  },
+  // messages: {
+  //   type: [],
+  //   ref: 'message',
+  //   default: [],
+  // }
 })
 
 module.exports = model('chat', chatSchema);

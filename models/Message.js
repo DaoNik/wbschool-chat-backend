@@ -24,7 +24,16 @@ const messageSchema = new Schema({
     type: Types.ObjectId,
     ref: 'user',
     required: true
+  },
+  chatId: {
+    type: Types.ObjectId,
+    ref: 'chat',
+    required: true
   }
 })
 
 module.exports = model('message', messageSchema);
+
+
+
+

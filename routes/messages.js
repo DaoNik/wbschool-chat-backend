@@ -7,10 +7,10 @@ const {
   updateMessage
 } = require('../controllers/messages');
 
-router.get('/', getMessages);
+router.get('/:chatId/messages', getMessages);
 
 router.post(
-  '/',
+  '/:chatId/messages',
   celebrate({
     body: Joi.object().keys({
       text: Joi.string().required().min(1).max(1000),
@@ -21,20 +21,22 @@ router.post(
 )
 
 router.delete(
-  '/:id',
+  '/:chatId/messages/:id',
   celebrate({
     params: Joi.object().keys({
-      id: Joi.string().length(24).hex()
+      id: Joi.string().length(24).hex(),
+      chatId: Joi.string().length(24).hex(),
     })
   }),
   deleteMessage
 )
 
 router.patch(
-  '/:id',
+  '/:chatId/messages/:id',
   celebrate({
     params: Joi.object().keys({
-      id: Joi.string().length(24).hex()
+      id: Joi.string().length(24).hex(),
+      chatId: Joi.string().length(24).hex(),
     }),
     body: Joi.object().keys({
       text: Joi.string().min(1).max(1000),

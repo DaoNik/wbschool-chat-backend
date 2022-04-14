@@ -9,7 +9,7 @@ const getNotifications = (req, res, next) => {
     .catch(next);
 }
 
-createNotification = (req, res, next) => {
+const createNotification = (req, res, next) => {
   Notification.create({...req.body, expiresIn: Date.now(), owner: req.user._id})
     .then(notification => {
       res.send(notification);

@@ -2,6 +2,18 @@ const Chat = require('../models/Chat');
 const ValidationError = require("../errors/ValidationError");
 const AllowsError = require("../errors/AllowsError");
 
+const getChat = (req, res, next) => {
+  const {id} = req.params;
+  Chat.findById(id)
+    .then(chat => {
+      if (!chat){
+        throw new NotFoundError('Нет чата с таким id');
+      }
+      res.send(chat);
+    })
+    .catch(next)
+}
+
 const getFriends = (req, res, next) => {
   Chat.find({})
     .where('users')
@@ -17,6 +29,7 @@ const getFriends = (req, res, next) => {
     })
     .catch(next);
 }
+
 
 const getGroups = (req, res, next) => {
   Chat.find({})
@@ -35,7 +48,7 @@ const getGroups = (req, res, next) => {
 }
 
 const createChat = (req, res, next) => {
-  Chat.create({...req.body, users: [req.user._id, ...req.body.users],  owner: req.user._id})
+  Chat.create({...req.body, users: [req.user._id, ...req.body.users], owner: req.user._id})
     .then((chat) => {
       res.send(chat);
     })
@@ -48,7 +61,7 @@ const createChat = (req, res, next) => {
 }
 
 const deleteChat = (req, res, next) => {
-  const { id } = req.params;
+  const {id} = req.params;
   return Chat.findById(id)
     .then(chat => {
       if (!chat) {
@@ -71,7 +84,7 @@ const deleteChat = (req, res, next) => {
 }
 
 const updateChat = (req, res, next) => {
-  const { id } = req.params;
+  const {id} = req.params;
   const {
     name,
     avatar,
@@ -112,4 +125,4 @@ const updateChat = (req, res, next) => {
     })
 }
 
-module.exports = {getFriends, getGroups, createChat, deleteChat, updateChat};
+module.exports = {getFriends, getGroups, createChat, deleteChat, updateChat, getChat };

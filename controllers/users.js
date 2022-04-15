@@ -76,6 +76,18 @@ const getUsers = (req, res, next) => {
     .catch(next)
 }
 
+const getUserData = (req, res, next) => {
+  const { username } = req.query;
+  User.findOne({username})
+    .then(user => {
+      if (!user) {
+        throw new NotFoundError('Нет такого пользователя')
+      }
+      res.send(user);
+    })
+    .catch(next)
+}
+
 const getUser = (req, res, next) => {
   User.findById(req.user._id)
     .then((user) => {
@@ -212,4 +224,4 @@ const updateUserPassword = (req, res, next) => {
     })
 }
 
-module.exports = {register, login, getUsers, getUser, deleteUser, updateUser, updateUserPassword};
+module.exports = {register, login, getUsers, getUserData, getUser, deleteUser, updateUser, updateUserPassword};

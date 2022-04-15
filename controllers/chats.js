@@ -83,8 +83,19 @@ const getGroups = (req, res, next) => {
 }
 
 const createChat = (req, res, next) => {
-  const usersId = req.body.users;
-  User.find
+  const { username } = req.query;
+  let usersData;
+  if (!username) {
+    usersData =  User.findOne({username})
+      .then(user => {
+        if (!user) {
+          throw new NotFoundError('Нет такого пользователя')
+        }
+        res.send(user);
+      })
+      .catch(next)
+  }
+
   Chat.create({...req.body, users: [req.user._id, ...req.body.users], owner: req.user._id})
     .then((chat) => {
       res.send(chat);

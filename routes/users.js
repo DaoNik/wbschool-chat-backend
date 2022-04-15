@@ -3,6 +3,7 @@ const { celebrate, Joi } = require('celebrate');
 const {
   getUsers,
   getUser,
+  getUserData,
   deleteUser,
   updateUser,
   updateUserPassword
@@ -10,6 +11,8 @@ const {
 const notificationsRouter =require('./notification');
 
 router.get('/', getUsers);
+
+router.get('/username', getUserData);
 
 router.get('/me', getUser);
 

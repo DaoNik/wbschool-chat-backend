@@ -14,7 +14,6 @@ const { PORT } = process.env;
 const { MONGO_URL } = process.env;
 
 const app = express();
-app.use(express);
 app.use(bodyParser.json());
 app.use(helmet());
 

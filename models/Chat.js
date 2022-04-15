@@ -5,7 +5,6 @@ const chatSchema = new Schema({
   name: {
     type: String,
     required: true,
-    unique: true,
     minLength: 4,
     maxLength: 40
   },

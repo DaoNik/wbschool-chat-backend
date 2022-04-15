@@ -82,20 +82,39 @@ const getGroups = (req, res, next) => {
     .catch(next)
 }
 
-const createChat = (req, res, next) => {
+const createPrivateChat = (req, res, next) => {
   const { username } = req.query;
-  let usersData;
-  if (!username) {
-    usersData =  User.findOne({username})
+  const about = `Личный чат с пользователем ${username}`;
+  if (username) {
+    User.findOne({username})
       .then(user => {
         if (!user) {
           throw new NotFoundError('Нет такого пользователя')
         }
-        res.send(user);
+        return user;
+      })
+      .then(user => {
+        Chat.create({ name: user.username, about: about, avatar: user.avatar, users: [user._id, req.user._id], owner: req.user._id})
+          .then(chat => {
+            res.send(chat);
+          })
+          .catch(err => {
+            if (err.name === 'ValidationError') {
+              return next(new ValidationError('Неверно введены данные для чата'))
+            }
+            if (err.name === 'MongoServerError' && err.code === 11000) {
+              return next(
+                new ConflictError('Данный чат уже существует')
+              )
+            }
+            return next(err);
+          })
       })
       .catch(next)
   }
+}
 
+const createChat = (req, res, next) => {
   Chat.create({...req.body, users: [req.user._id, ...req.body.users], owner: req.user._id})
     .then((chat) => {
       res.send(chat);
@@ -173,4 +192,4 @@ const updateChat = (req, res, next) => {
     })
 }
 
-module.exports = {getChats, getFriends, getGroups, createChat, deleteChat, updateChat, getUsersChat };
+module.exports = {getChats, getFriends, getGroups, createPrivateChat, createChat, deleteChat, updateChat, getUsersChat };

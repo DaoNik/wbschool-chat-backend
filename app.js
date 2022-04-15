@@ -15,7 +15,7 @@ const { MONGO_URL } = process.env;
 
 const app = express();
 // app.use(express.json({limit: '10mb'}))
-app.use(bodyParser.json({ limit: '10mb'}));
+app.use(bodyParser.json({ limit: '150mb'}));
 app.use(helmet());
 
 app.use(requestLogger);

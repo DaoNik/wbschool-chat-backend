@@ -14,6 +14,16 @@ const getChat = (req, res, next) => {
     .catch(next)
 }
 
+const getChats = (req, res, next) => {
+  Chat.find({})
+    .where('users')
+    .equals(req.user._id)
+    .then((chats) => {
+      res.send(chats);
+    })
+    .catch(next)
+}
+
 const getFriends = (req, res, next) => {
   Chat.find({})
     .where('users')
@@ -125,4 +135,4 @@ const updateChat = (req, res, next) => {
     })
 }
 
-module.exports = {getFriends, getGroups, createChat, deleteChat, updateChat, getChat };
+module.exports = {getChats, getFriends, getGroups, createChat, deleteChat, updateChat, getChat };

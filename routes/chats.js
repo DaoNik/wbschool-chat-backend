@@ -7,12 +7,18 @@ const {
   deleteChat,
   updateChat,
   getChat,
+  getChats
 } = require('../controllers/chats');
 const messagesRouter = require("./messages");
 
-router.get('/', getFriends);
+router.get('/', getChats);
+
+router.get('/friends', getFriends);
+
 router.get('/groups', getGroups);
-router.get('/:id', getChat)
+
+router.get('/:id', getChat);
+
 router.post(
   '/',
   celebrate({

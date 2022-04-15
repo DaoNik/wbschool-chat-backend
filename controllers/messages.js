@@ -15,19 +15,16 @@ const getMessages = (req, res, next) => {
 const createMessage = (req, res, next) => {
   console.log(req.user, req.body, req.params);
   const {chatId} = req.params;
-  Message.find({chatId}).then(() => {
-    Message.create({...req.body, chatId: chatId, expiresIn: Date.now(), owner: req.user._id})
-      .then((message) => {
-        res.send(message);
-      })
-      .catch(err => {
-        if (err.name === 'ValidationError') {
-          return next(new ValidationError('Неверно введены данные для сообщения'))
-        }
-        return next(err);
-      })
-  })
-
+  Message.create({...req.body, chatId: chatId, expiresIn: Date.now(), owner: req.user._id})
+    .then((message) => {
+      res.send(message);
+    })
+    .catch(err => {
+      if (err.name === 'ValidationError') {
+        return next(new ValidationError('Неверно введены данные для сообщения'))
+      }
+      return next(err);
+    })
 }
 
 const deleteMessage = (req, res, next) => {

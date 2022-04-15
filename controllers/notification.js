@@ -3,6 +3,8 @@ const ValidationError = require("../errors/ValidationError");
 
 const getNotifications = (req, res, next) => {
   Notification.find({})
+    .where('owner')
+    .equals(req.user._id)
     .then((notification) => {
       res.send(notification)
     })

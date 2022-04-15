@@ -14,7 +14,7 @@ const { PORT } = process.env;
 const { MONGO_URL } = process.env;
 
 const app = express();
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limiter: '1mb'}));
 app.use(helmet());
 
 app.use(requestLogger);

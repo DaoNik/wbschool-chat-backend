@@ -17,7 +17,7 @@ router.get('/friends', getFriends);
 
 router.get('/groups', getGroups);
 
-router.get('/:id', getUsersChat);
+router.get('/:id/users', getUsersChat);
 
 router.post(
   '/',

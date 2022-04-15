@@ -28,8 +28,6 @@ const getUsersChat = (req, res, next) => {
           })
           res.send(usersChat);
         })
-
-      // res.send(chat);
     })
     .catch((err) => {
       if (err.name === 'MongoServerError' && err.code === 11000) {

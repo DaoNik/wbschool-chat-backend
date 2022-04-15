@@ -54,7 +54,7 @@ const deleteMessage = (req, res, next) => {
 
 const updateMessage = (req, res, next) => {
   const {id} = req.params;
-  const {text, imageOrFile} = req.body;
+  const {text, imageOrFile, formatImage} = req.body;
   const expiresIn = Date.now();
 
   return Message.findById(id)
@@ -70,7 +70,7 @@ const updateMessage = (req, res, next) => {
     })
     .then(() => Message.findByIdAndUpdate(
       id,
-      {text, imageOrFile, expiresIn},
+      {text, imageOrFile, expiresIn, formatImage},
       {new: true, runValidators: true}
     ))
     .then((message) => {

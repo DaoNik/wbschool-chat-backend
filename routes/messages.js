@@ -15,6 +15,7 @@ router.post(
     body: Joi.object().keys({
       text: Joi.string().required().min(1).max(1000),
       imageOrFile: Joi.string().base64(),
+      formatImage: Joi.string().min(1).max(50)
     })
   }),
   createMessage
@@ -41,7 +42,8 @@ router.patch(
     body: Joi.object().keys({
       text: Joi.string().min(1).max(1000),
       imageOrFile: Joi.string().base64(),
-      expiresIn: Joi.date()
+      expiresIn: Joi.date(),
+      formatImage: Joi.string().min(1).max(50)
     })
   }),
   updateMessage

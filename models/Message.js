@@ -14,6 +14,11 @@ const messageSchema = new Schema({
       validator: (value) => validator.isBase64(value)
     }
   },
+  formatImage: {
+    type: String,
+    minLength: 1,
+    maxLength: 50
+  },
   expiresIn: {
     type: Date,
     validate: {

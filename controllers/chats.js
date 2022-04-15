@@ -1,17 +1,44 @@
 const Chat = require('../models/Chat');
+const User = require('../models/User');
 const ValidationError = require("../errors/ValidationError");
 const AllowsError = require("../errors/AllowsError");
+const NotFoundError = require("../errors/NotFoundError");
+const ConflictError = require("../errors/ConflictError");
 
-const getChat = (req, res, next) => {
+const getUsersChat = (req, res, next) => {
   const {id} = req.params;
   Chat.findById(id)
     .then(chat => {
       if (!chat){
         throw new NotFoundError('Нет чата с таким id');
       }
-      res.send(chat);
+      User.find({})
+        .where('_id')
+        .in(chat.users)
+        .then(users => {
+          console.log(users);
+          const usersChat = [];
+          users.map(user => {
+            const newUser = user.toObject();
+            delete newUser.userRights;
+            delete newUser.email;
+            delete newUser.about;
+            delete newUser.__v;
+            usersChat.push(newUser);
+          })
+          res.send(usersChat);
+        })
+
+      // res.send(chat);
     })
-    .catch(next)
+    .catch((err) => {
+      if (err.name === 'MongoServerError' && err.code === 11000) {
+        return next(
+          ConflictError('Это имя чата уже занято')
+        )
+      }
+      return next(err);
+    })
 }
 
 const getChats = (req, res, next) => {
@@ -58,6 +85,8 @@ const getGroups = (req, res, next) => {
 }
 
 const createChat = (req, res, next) => {
+  const usersId = req.body.users;
+  User.find
   Chat.create({...req.body, users: [req.user._id, ...req.body.users], owner: req.user._id})
     .then((chat) => {
       res.send(chat);
@@ -135,4 +164,4 @@ const updateChat = (req, res, next) => {
     })
 }
 
-module.exports = {getChats, getFriends, getGroups, createChat, deleteChat, updateChat, getChat };
+module.exports = {getChats, getFriends, getGroups, createChat, deleteChat, updateChat, getUsersChat };

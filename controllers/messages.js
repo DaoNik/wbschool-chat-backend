@@ -1,6 +1,7 @@
 const Message = require('../models/Message');
 const ValidationError = require("../errors/ValidationError");
 const AllowsError = require("../errors/AllowsError");
+const NotFoundError = require("../errors/NotFoundError");
 
 const getMessages = (req, res, next) => {
   console.log(req.params);

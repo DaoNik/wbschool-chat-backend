@@ -44,11 +44,6 @@ const chatSchema = new Schema({
     ref: 'user',
     required: true
   },
-  // messages: {
-  //   type: [],
-  //   ref: 'message',
-  //   default: [],
-  // }
 })
 
 module.exports = model('chat', chatSchema);

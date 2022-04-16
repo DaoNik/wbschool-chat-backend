@@ -14,8 +14,11 @@ const { PORT } = process.env;
 const { MONGO_URL } = process.env;
 
 const app = express();
-// app.use(express.json({limit: '10mb'}))
-app.use(bodyParser.json({ limit: '150mb'}));
+app.use(bodyParser.json({ limit: '100mb'}));
+app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
+  limit: '100mb',
+  extended: true
+}));
 app.use(helmet());
 
 app.use(requestLogger);
@@ -24,7 +27,7 @@ app.use(handleAllowedCors);
 
 app.use(limiter);
 
-app.use(router);
+app.use('/api', router);
 
 app.use(errorLogger);
 

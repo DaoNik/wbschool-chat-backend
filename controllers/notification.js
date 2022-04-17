@@ -58,7 +58,7 @@ const clearNotifications = (req, res, next) => {
           .then(() => res.write('Ok'))
       })
     })
-    .then(() => res.send('success'))
+    .then(() => res.send([]))
     .catch(next)
 }
 

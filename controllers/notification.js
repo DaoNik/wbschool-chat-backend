@@ -1,5 +1,6 @@
 const Notification = require('../models/Notification');
 const ValidationError = require("../errors/ValidationError");
+const NotFoundError = require("../errors/NotFoundError");
 
 const getNotifications = (req, res, next) => {
   Notification.find({})
@@ -44,4 +45,21 @@ const deleteNotification = (req, res, next) => {
     })
 }
 
-module.exports = {getNotifications, deleteNotification, createNotification};
+const clearNotifications = (req, res, next) => {
+  return Notification.find({})
+    .where('owner')
+    .equals(req.user._id)
+    .then(notifications => {
+      if (!notifications) {
+        throw new NotFoundError('У вас нет оповещений')
+      }
+      notifications.map(notification => {
+        Notification.findByIdAndDelete(notification._id)
+          .then(() => res.write('Ok'))
+      })
+    })
+    .then(() => res.send({status: 'Ok'}))
+    .catch(next)
+}
+
+module.exports = {getNotifications, deleteNotification, clearNotifications, createNotification};

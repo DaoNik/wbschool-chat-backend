@@ -8,7 +8,7 @@ const {
   updateUser,
   updateUserPassword
 } = require('../controllers/users');
-const notificationsRouter =require('./notification');
+const notificationsRouter = require('./notification');
 
 router.get('/', getUsers);
 

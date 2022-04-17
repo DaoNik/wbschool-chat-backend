@@ -3,6 +3,7 @@ const {celebrate, Joi} = require('celebrate');
 const {
   getNotifications,
   deleteNotification,
+  clearNotifications,
   createNotification
 } = require('../controllers/notification');
 
@@ -15,6 +16,8 @@ router.post('/',
     })
   }),
   createNotification)
+
+router.delete('/clear', clearNotifications);
 
 router.delete('/:id',
   celebrate({

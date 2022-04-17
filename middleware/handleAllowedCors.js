@@ -1,5 +1,6 @@
 const allowedCors = [
   'http://localhost:4200',
+  'http://localhost:4201',
   'http://www.wbschool-chat.ru',
   'https://www.wbschool-chat.ru',
   'http://wbschool-chat.ru',

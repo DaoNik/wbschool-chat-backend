@@ -22,19 +22,23 @@ const addContact = (req, res, next) => {
       if (!user) {
         throw new NotFoundError('Нет пользователя с таким id')
       }
+      const newUser = user.toObject();
+      delete newUser.userRights;
+      delete newUser.email;
+      delete newUser.__v;
       Contacts.findOne({owner: req.user._id})
         .then(contactsUser => {
           if (!contactsUser) {
-            Contacts.create({contacts: [user], owner: req.user._id})
+            Contacts.create({contacts: [newUser], owner: req.user._id})
               .then(contacts => res.send(contacts))
           }
-          const newContacts = [...contactsUser.contacts, user];
+          const newContacts = [...contactsUser.contacts, newUser];
           Contacts.findByIdAndUpdate(
             contactsUser._id,
             {contacts: newContacts},
             {new: true, runValidators: true}
           )
-            .then(() => res.send(user))
+            .then(() => res.send(newUser))
         })
     })
     .catch(next)

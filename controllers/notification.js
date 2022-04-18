@@ -1,6 +1,7 @@
 const Notification = require('../models/Notification');
 const ValidationError = require("../errors/ValidationError");
 const NotFoundError = require("../errors/NotFoundError");
+const AllowsError = require("../errors/AllowsError");
 
 const getNotifications = (req, res, next) => {
   Notification.find({})
@@ -33,6 +34,11 @@ const deleteNotification = (req, res, next) => {
       if (!notification) {
         throw new NotFoundError('Нет оповещения с таким id')
       }
+      const notificationOwnerId = notification.owner.toString();
+      if (notificationOwnerId !== req.user._id) {
+        throw new AllowsError('Вы не можете удалить это уведомление')
+      }
+      return notification;
     })
     .then(() => Notification.findByIdAndDelete(id))
     .then(() => res.send(id))

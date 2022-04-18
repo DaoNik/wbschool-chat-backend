@@ -43,7 +43,7 @@ const deleteMessage = (req, res, next) => {
       return message;
     })
     .then(() => Message.findByIdAndDelete(id))
-    .then((message) => res.send(message))
+    .then((message) => res.send(message._id))
     .catch((err) => {
       if (err.name === 'CastError') {
         return next(new ValidationError('Невалидный id сообщения'))

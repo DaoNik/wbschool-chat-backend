@@ -3,9 +3,7 @@ const User = require('../models/User');
 const NotFoundError = require("../errors/NotFoundError");
 
 const getContacts = (req, res, next) => {
-  Contacts.find({})
-    .where('owner')
-    .equals(req.user._id)
+  Contacts.findOne({owner: req.user._id})
     .then(contacts => {
       if (!contacts) {
         throw new NotFoundError('У вас нет контактов')

@@ -1,5 +1,7 @@
 require('dotenv').config();
 const express = require('express');
+const { createServer } = require("http");
+const { Server } = require("socket.io");
 const helmet = require('helmet');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
@@ -14,6 +16,12 @@ const { PORT } = process.env;
 const { MONGO_URL } = process.env;
 
 const app = express();
+const httpServer = createServer(app);
+const io = new Server(httpServer, {
+  cors: {
+    origin: "http://localhost:4200"
+  }
+});
 app.use(bodyParser.json({ limit: '100mb'}));
 app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
   limit: '100mb',
@@ -26,6 +34,10 @@ app.use(requestLogger);
 app.use(handleAllowedCors);
 
 app.use(limiter);
+
+io.on("connection", () => {
+
+})
 
 app.use('/api', router);
 
@@ -41,7 +53,7 @@ async function start() {
       useNewUrlParser: true,
       useUnifiedTopology: true
     });
-    app.listen(PORT, () => {
+    httpServer.listen(PORT, () => {
       console.log(`App has been started port ${PORT}`)
     })
   } catch (e) {

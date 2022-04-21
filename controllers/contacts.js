@@ -27,8 +27,7 @@ const addContact = (req, res, next) => {
       Contacts.findOne({owner: req.user._id})
         .then(contactsUser => {
           if (!contactsUser) {
-            Contacts.create({contacts: [newUser], owner: req.user._id})
-              .then(contacts => res.send(contacts))
+            throw new NotFoundError('Ты кто я тебя не звал')
           }
           const newContacts = [...contactsUser.contacts, newUser];
           Contacts.findByIdAndUpdate(

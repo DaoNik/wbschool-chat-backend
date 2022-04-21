@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const Contacts = require('../models/Contacts')
 const AuthorizationError = require('../errors/AuthorizationError');
 const ValidationError = require('../errors/ValidationError')
 const ConflictError = require("../errors/ConflictError");
@@ -17,6 +18,8 @@ const register = (req, res, next) => {
     .then((hash) => User.create({email, password: hash, username}))
     .then((user) => {
       const email = user.email;
+      Contacts.create({contacts: [], owner: user._id})
+        .then(contacts => res.send(contacts))
       res.send({email});
     })
     .catch((err) => {
@@ -83,6 +86,7 @@ const getUserData = (req, res, next) => {
       if (!user) {
         throw new NotFoundError('Нет такого пользователя')
       }
+      if(user.contact )
       res.send(user);
     })
     .catch(next)

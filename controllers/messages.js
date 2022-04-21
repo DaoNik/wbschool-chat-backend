@@ -1,5 +1,4 @@
 const Message = require('../models/Message');
-const User = req
 const ValidationError = require("../errors/ValidationError");
 const AllowsError = require("../errors/AllowsError");
 const NotFoundError = require("../errors/NotFoundError");

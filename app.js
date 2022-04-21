@@ -19,7 +19,7 @@ const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
-    origin: "http://localhost:4200"
+    origin: "http://localhost:4202"
   }
 });
 app.use(bodyParser.json({ limit: '100mb'}));
@@ -44,7 +44,7 @@ io.on("connection", (socket) => {
   socket.emit('message', 'I\'m server');
 
   socket.on('message', (message) => {
-    console.log(message);
+    socket.on()
   })
 })
 

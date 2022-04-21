@@ -140,11 +140,11 @@ const deleteUser = (req, res, next) => {
 }
 
 const updateUser = (req, res, next) => {
-  const { email, username, about, avatar } = req.body;
+  const { email, username, about, avatar, formatImage } = req.body;
 
   return User.findByIdAndUpdate(
     req.user._id,
-    { email, username, about, avatar },
+    { email, username, about, avatar, formatImage },
     { new: true, runValidators: true }
   )
     .then((user) => {

@@ -16,7 +16,7 @@ const messageSchema = new Schema({
   },
   formatImage: {
     type: String,
-    minLength: 1,
+    minLength: 10,
     maxLength: 50
   },
   expiresIn: {

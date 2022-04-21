@@ -38,6 +38,12 @@ const userSchema = new Schema({
     maxLength: 100,
     default: 'I use wbshool-chat'
   },
+  formatImage: {
+    type: String,
+    minLength: 10,
+    maxLength: 50,
+    default: 'data:image/png;base64,'
+  },
   avatar: {
     type: String,
     validate: {

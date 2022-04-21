@@ -36,6 +36,7 @@ router.patch(
     body: Joi.object().keys({
       about: Joi.string().min(2).max(100),
       avatar: Joi.string().base64(),
+      formatImage: Joi.string().min(10).max(50),
       email: Joi.string().email(),
       username: Joi.string().min(4).max(30).regex(RegExp('^[a-zA-Z0-9а-яёА-ЯЁ]*[-_— .]?[a-zA-Z0-9а-яёА-ЯЁ]*$', '')),
     })

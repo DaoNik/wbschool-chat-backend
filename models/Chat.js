@@ -8,6 +8,11 @@ const chatSchema = new Schema({
     minLength: 4,
     maxLength: 40
   },
+  formatImage: {
+    type: String,
+    minLength: 10,
+    maxLength: 50
+  },
   avatar: {
     type: String,
     validate: {
@@ -36,6 +41,11 @@ const chatSchema = new Schema({
     type: [Types.ObjectId],
     required: true,
     ref: 'user',
+    default: []
+  },
+  usernames: {
+    type: [],
+    required: true,
     default: []
   },
   owner: {

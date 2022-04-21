@@ -5,6 +5,7 @@ const AllowsError = require("../errors/AllowsError");
 const NotFoundError = require("../errors/NotFoundError");
 const ConflictError = require("../errors/ConflictError");
 
+// Нахрен не надо
 const getUsersChat = (req, res, next) => {
   const {id} = req.params;
   Chat.findById(id)
@@ -84,6 +85,8 @@ const getGroups = (req, res, next) => {
 
 const createPrivateChat = (req, res, next) => {
   const { username } = req.query;
+  const { ownerUsername } = req.body;
+
   const about = `Личный чат с пользователем ${username}`;
   if (username) {
     User.findOne({username})
@@ -94,7 +97,7 @@ const createPrivateChat = (req, res, next) => {
         return user;
       })
       .then(user => {
-        Chat.create({ name: user.username, about: about, avatar: user.avatar, users: [user._id, req.user._id], owner: req.user._id})
+        Chat.create({ name: user.username, about: about, avatar: user.avatar, formatImage: user.formatImage, users: [user._id, req.user._id], usernames: [user.username, ownerUsername], owner: req.user._id})
           .then(chat => {
             res.send(chat);
           })
@@ -155,6 +158,7 @@ const updateChat = (req, res, next) => {
   const {
     name,
     avatar,
+    formatImage,
     about,
     users,
     isNotifications,
@@ -175,7 +179,7 @@ const updateChat = (req, res, next) => {
     })
     .then(() => Chat.findByIdAndUpdate(
       id,
-      {name, avatar, about, users, isNotifications, isRead, isActive},
+      {name, avatar, formatImage, about, users, isNotifications, isRead, isActive},
       {new: true, runValidators: true}
     ))
     .then((chat) => {

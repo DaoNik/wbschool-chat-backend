@@ -24,7 +24,9 @@ router.post(
   '/private',
   celebrate({
     body: Joi.object().keys({
+      ownerUsername: Joi.string(),
       name: Joi.string().min(4).max(40),
+      formatImage: Joi.string().min(10).max(50),
       avatar: Joi.string().base64(),
       about: Joi.string().min(4).max(100),
       isNotifications: Joi.boolean(),
@@ -41,6 +43,7 @@ router.post(
   celebrate({
     body: Joi.object().keys({
       name: Joi.string().required().min(4).max(40),
+      formatImage: Joi.string().min(10).max(50),
       avatar: Joi.string().base64(),
       about: Joi.string().min(4).max(100),
       isNotifications: Joi.boolean(),
@@ -70,6 +73,7 @@ router.patch(
     }),
     body: Joi.object().keys({
       name: Joi.string().min(4).max(40),
+      formatImage: Joi.string().min(10).max(50),
       avatar: Joi.string().base64(),
       about: Joi.string().min(4).max(100),
       isNotifications: Joi.boolean(),

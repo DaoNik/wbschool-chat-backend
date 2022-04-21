@@ -43,10 +43,13 @@ io.on("connection", (socket) => {
 
   socket.emit('message', 'I\'m server');
 
-  socket.on('message', (message) => {
-    socket.on()
-  })
+  socket.on("message", (anotherSocketId, msg) => {
+    console.log(msg);
+    socket.to("ztXXpeCi16BkRkp7AAAC").emit("message", socket.id, msg);
+  });
 })
+
+module.exports = {io}
 
 app.use('/api', router);
 

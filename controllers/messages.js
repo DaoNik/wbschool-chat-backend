@@ -2,6 +2,7 @@ const Message = require('../models/Message');
 const ValidationError = require("../errors/ValidationError");
 const AllowsError = require("../errors/AllowsError");
 const NotFoundError = require("../errors/NotFoundError");
+const {io} = require("../app");
 
 const getMessages = (req, res, next) => {
   console.log(req.params);
@@ -18,6 +19,10 @@ const createMessage = (req, res, next) => {
   const {chatId} = req.params;
   Message.create({...req.body, chatId: chatId, expiresIn: Date.now(), owner: req.user._id})
     .then((message) => {
+      // io.sockets.connected[req.user._id].emit(
+      //   'message',
+      //   `Message to client with id ${req.user._id}`
+      // )
       res.send(message);
     })
     .catch(err => {

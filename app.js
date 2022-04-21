@@ -35,8 +35,17 @@ app.use(handleAllowedCors);
 
 app.use(limiter);
 
-io.on("connection", () => {
+let clients = [];
 
+io.on("connection", (socket) => {
+  console.log(`Client with id ${socket.id} connected`)
+  clients.push(socket.id)
+
+  socket.emit('message', 'I\'m server');
+
+  socket.on('message', (message) => {
+    console.log(message);
+  })
 })
 
 app.use('/api', router);

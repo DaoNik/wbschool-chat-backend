@@ -27,6 +27,7 @@ const addContact = (req, res, next) => {
       Contacts.findOne({owner: req.user._id})
         .then(contactsUser => {
           if (!contactsUser) {
+            // удалить, как базу снесем
             Contacts.create({contacts: [newUser], owner: req.user._id})
               .then(contacts => res.send(contacts))
           }

@@ -86,7 +86,7 @@ const getUserData = (req, res, next) => {
       if (!user) {
         throw new NotFoundError('Нет такого пользователя')
       }
-      if(user.contact )
+      if(user)
       res.send(user);
     })
     .catch(next)

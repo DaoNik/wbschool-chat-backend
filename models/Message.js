@@ -34,6 +34,10 @@ const messageSchema = new Schema({
     type: Types.ObjectId,
     ref: 'chat',
     required: true
+  },
+  username: {
+    type: String,
+    required: true
   }
 })
 

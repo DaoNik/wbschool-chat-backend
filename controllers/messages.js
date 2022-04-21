@@ -1,4 +1,5 @@
 const Message = require('../models/Message');
+const User = require('../models/User')
 const ValidationError = require("../errors/ValidationError");
 const AllowsError = require("../errors/AllowsError");
 const NotFoundError = require("../errors/NotFoundError");
@@ -16,15 +17,21 @@ const getMessages = (req, res, next) => {
 const createMessage = (req, res, next) => {
   console.log(req.user, req.body, req.params);
   const {chatId} = req.params;
-  Message.create({...req.body, chatId: chatId, expiresIn: Date.now(), owner: req.user._id})
-    .then((message) => {
-      res.send(message);
-    })
-    .catch(err => {
-      if (err.name === 'ValidationError') {
-        return next(new ValidationError('Неверно введены данные для сообщения'))
+  User.findById(req.user._id)
+    .then((user) => {
+      if (!user) {
+        throw new NotFoundError('Нет такого пользователя')
       }
-      return next(err);
+      Message.create({...req.body, chatId: chatId, expiresIn: Date.now(), owner: req.user._id, username: user.username})
+        .then((message) => {
+          res.send(message);
+        })
+        .catch(err => {
+          if (err.name === 'ValidationError') {
+            return next(new ValidationError('Неверно введены данные для сообщения'))
+          }
+          return next(err);
+        })
     })
 }
 

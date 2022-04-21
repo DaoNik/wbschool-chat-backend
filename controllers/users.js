@@ -19,7 +19,7 @@ const register = (req, res, next) => {
     .then((user) => {
       const email = user.email;
       Contacts.create({contacts: [], owner: user._id})
-        .then(contacts => res.send(contacts))
+        .then(() => (console.log('У тебя есть контакты')));
       res.send({email});
     })
     .catch((err) => {

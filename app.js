@@ -78,7 +78,9 @@ app.post('/api/chats/:chatId/messages', (req, res, next) => {
         .then((message) => {
           console.log(message);
           io.emit('message', message);
+          io.emit(message);
           io.volatile.emit('message', message);
+          io.volatile.emit(message);
           res.send(message);
         })
         .catch(err => {

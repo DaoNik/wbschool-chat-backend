@@ -29,6 +29,7 @@ const allowedCors = [
 const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
+  path: 'https://wbschool-chat.ru/api',
   cors: {
     origin: allowedCors
   }

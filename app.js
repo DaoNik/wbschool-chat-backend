@@ -53,47 +53,47 @@ let clients = [];
 io.on("connection", (socket) => {
   console.log(`Client with id ${socket.id} connected`)
   clients.push(socket.id);
+})
 
+app.use('/api', router);
 
-  app.use('/api', router);
-
-  app.get('/api/clients-count', (req, res) => {
-    console.log('Count', io.engine.clientsCount)
-    res.send({
-      count: io.engine.clientsCount,
-    })
-  })
-
-  app.post('/api/chats/:chatId/messages', (req, res, next) => {
-    const {chatId} = req.params;
-    User.findById(req.user._id)
-      .then((user) => {
-        Message.create({
-          ...req.body,
-          username: user.username,
-          chatId: chatId,
-          expiresIn: Date.now(),
-          owner: req.user._id
-        })
-          .then((message) => {
-            console.log(message);
-            socket.broadcast.emit('message', message);
-            res.send(message);
-          })
-          .catch(err => {
-            if (err.name === 'ValidationError') {
-              return next(new ValidationError('Неверно введены данные для сообщения'))
-            }
-            return next(err);
-          })
-      })
-      .catch(next)
-  })
-
-  app.use(/.*/, (req, res, next) => {
-    next(new NotFoundError('Страница не найдена'));
+app.get('/api/clients-count', (req, res) => {
+  console.log('Count', io.engine.clientsCount)
+  res.send({
+    count: io.engine.clientsCount,
   })
 })
+
+app.post('/api/chats/:chatId/messages', (req, res, next) => {
+  const {chatId} = req.params;
+  User.findById(req.user._id)
+    .then((user) => {
+      Message.create({
+        ...req.body,
+        username: user.username,
+        chatId: chatId,
+        expiresIn: Date.now(),
+        owner: req.user._id
+      })
+        .then((message) => {
+          console.log(message);
+          io.emit('message', message);
+          res.send(message);
+        })
+        .catch(err => {
+          if (err.name === 'ValidationError') {
+            return next(new ValidationError('Неверно введены данные для сообщения'))
+          }
+          return next(err);
+        })
+    })
+    .catch(next)
+})
+
+app.use(/.*/, (req, res, next) => {
+  next(new NotFoundError('Страница не найдена'));
+})
+
 
 app.use(errorLogger);
 

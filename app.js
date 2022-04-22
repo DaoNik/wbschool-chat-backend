@@ -11,19 +11,26 @@ const {requestLogger, errorLogger} = require('./middleware/logger');
 const handleAllowedCors = require('./middleware/handleAllowedCors');
 const handleErrors = require('./middleware/handleErrors');
 const {Server} = require("socket.io");
-const Message = require('./models/Message')
+const Message = require('./models/Message');
+const User = require("./models/User");
 const NotFoundError = require("./errors/NotFoundError");
 const ValidationError = require("./errors/ValidationError");
 
 const {PORT} = process.env;
 const {MONGO_URL} = process.env;
 
+const allowedCors = [
+  'http://localhost:4200',
+  'http://localhost:4201',
+  'http://localhost:4202',
+  'https://wbschool-chat.ru'
+]
+
 const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
-    // ПОМЕНЯТЬ ПРИ ДЕПЛОЕ
-    origin: '*'
+    origin: allowedCors
   }
 });
 
@@ -44,13 +51,7 @@ let clients = [];
 
 io.on("connection", (socket) => {
   console.log(`Client with id ${socket.id} connected`)
-  clients.push(socket.id)
-
-  // socket.on("message", (msg) => {
-  //   Message.create({...msg, expiresIn: Date.now(), owner: "6261a2668262051dc186f528"}).then((message) => {
-  //     socket.broadcast.emit("message", message);
-  //   })
-  // });
+  clients.push(socket.id);
 })
 
 app.use('/api', router);
@@ -63,24 +64,35 @@ app.get('/api/clients-count', (req, res) => {
 })
 
 app.post('/api/chats/:chatId/messages', (req, res, next) => {
-  console.log(req.user, req.body, req.params);
-  const { chatId } = req.params;
-  Message.create({...req.body, chatId: chatId, expiresIn: Date.now(), owner: req.user._id})
-    .then((message) => {
-      io.emit(message);
-      res.send(message);
+  const {chatId} = req.params;
+  User.findById(req.user._id)
+    .then((user) => {
+      Message.create({
+        ...req.body,
+        username: user.username,
+        chatId: chatId,
+        expiresIn: Date.now(),
+        owner: req.user._id
+      })
+        .then((message) => {
+          console.log(message);
+          io.emit('message', message);
+          res.send(message);
+        })
+        .catch(err => {
+          if (err.name === 'ValidationError') {
+            return next(new ValidationError('Неверно введены данные для сообщения'))
+          }
+          return next(err);
+        })
     })
-    .catch(err => {
-      if (err.name === 'ValidationError') {
-        return next(new ValidationError('Неверно введены данные для сообщения'))
-      }
-      return next(err);
-    })
+    .catch(next)
 })
 
 app.use(/.*/, (req, res, next) => {
   next(new NotFoundError('Страница не найдена'));
 })
+
 
 app.use(errorLogger);
 

@@ -13,28 +13,20 @@ const getMessages = (req, res, next) => {
     .catch(next);
 }
 
-const createMessage = (req, res, next) => {
-  console.log(req.user, req.body, req.params);
-  const {chatId} = req.params;
-  Message.create({...req.body, chatId: chatId, expiresIn: Date.now(), owner: req.user._id})
-    .then((message) => {
-      // socket.on('message', (msg) => {
-      //   socket.broadcast.emit('message', JSON.stringify(message));
-      // })
-
-      // io.sockets.connected[req.user._id].emit(
-      //   'message',
-      //   `Message to client with id ${req.user._id}`
-      // )
-      res.send(message);
-    })
-    .catch(err => {
-      if (err.name === 'ValidationError') {
-        return next(new ValidationError('Неверно введены данные для сообщения'))
-      }
-      return next(err);
-    })
-}
+// const createMessage = (req, res, next) => {
+//   console.log(req.user, req.body, req.params);
+//   const {chatId} = req.params;
+//   Message.create({...req.body, chatId: chatId, expiresIn: Date.now(), owner: req.user._id})
+//     .then((message) => {
+//       res.send(message);
+//     })
+//     .catch(err => {
+//       if (err.name === 'ValidationError') {
+//         return next(new ValidationError('Неверно введены данные для сообщения'))
+//       }
+//       return next(err);
+//     })
+// }
 
 const deleteMessage = (req, res, next) => {
   const {id} = req.params;
@@ -96,4 +88,4 @@ const updateMessage = (req, res, next) => {
     })
 }
 
-module.exports = {getMessages, createMessage, deleteMessage, updateMessage}
+module.exports = {getMessages, deleteMessage, updateMessage}

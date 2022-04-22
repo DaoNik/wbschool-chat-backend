@@ -2,24 +2,24 @@ const router = require('express').Router();
 const {celebrate, Joi} = require('celebrate');
 const {
   getMessages,
-  createMessage,
+  // createMessage,
   deleteMessage,
   updateMessage
 } = require('../controllers/messages');
 
 router.get('/:chatId/messages', getMessages);
 
-router.post(
-  '/:chatId/messages',
-  celebrate({
-    body: Joi.object().keys({
-      text: Joi.string().required().min(1).max(1000),
-      imageOrFile: Joi.string().base64(),
-      formatImage: Joi.string().min(1).max(50)
-    })
-  }),
-  createMessage
-)
+// router.post(
+//   '/:chatId/messages',
+//   celebrate({
+//     body: Joi.object().keys({
+//       text: Joi.string().required().min(1).max(1000),
+//       imageOrFile: Joi.string().base64(),
+//       formatImage: Joi.string().min(1).max(50)
+//     })
+//   }),
+//   createMessage
+// )
 
 router.delete(
   '/:chatId/messages/:id',

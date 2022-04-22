@@ -1,7 +1,6 @@
 require('dotenv').config();
 const express = require('express');
 const { createServer } = require("http");
-const { Server } = require("socket.io");
 const helmet = require('helmet');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
@@ -11,6 +10,8 @@ const limiter = require('./middleware/limiter')
 const {requestLogger, errorLogger} = require('./middleware/logger');
 const handleAllowedCors = require('./middleware/handleAllowedCors');
 const handleErrors = require('./middleware/handleErrors');
+const {Server} = require("socket.io");
+const Message = require('./models/Message')
 
 const { PORT } = process.env;
 const { MONGO_URL } = process.env;
@@ -19,9 +20,10 @@ const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
-    origin: "http://localhost:4202"
+    origin: "http://localhost:4200"
   }
 });
+
 app.use(bodyParser.json({ limit: '100mb'}));
 app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
   limit: '100mb',
@@ -42,16 +44,16 @@ io.on("connection", (socket) => {
   clients.push(socket.id)
 
   socket.emit('message', 'I\'m server');
-
-  socket.on("message", (anotherSocketId, msg) => {
-    console.log(msg);
-    socket.to("ztXXpeCi16BkRkp7AAAC").emit("message", socket.id, msg);
+  socket.on("message", (msg) => {
+    Message.create({ ...msg, expiresIn: Date.now(), owner: "6261a2668262051dc186f528" }).then((message) => {
+      socket.broadcast.emit("message", message);
+    })
   });
 })
 
-module.exports = {io}
-
 app.use('/api', router);
+
+app.post('/api')
 
 app.use(errorLogger);
 

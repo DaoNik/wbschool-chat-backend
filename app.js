@@ -29,6 +29,7 @@ const allowedCors = [
 const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
+  path: '/api',
   cors: {
     origin: allowedCors
   }

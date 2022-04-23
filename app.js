@@ -29,7 +29,6 @@ const allowedCors = [
 const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
-  path: 'https://wbschool-chat.ru/api',
   cors: {
     origin: allowedCors
   }
@@ -37,8 +36,7 @@ const io = new Server(httpServer, {
 
 app.use(bodyParser.json({limit: '100mb'}));
 app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
-  limit: '100mb',
-  extended: true
+  limit: '100mb', extended: true
 }));
 app.use(helmet());
 
@@ -53,6 +51,11 @@ let clients = [];
 io.on("connection", (socket) => {
   console.log(`Client with id ${socket.id} connected`)
   clients.push(socket.id);
+
+  socket.on('disconnect', () => {
+    clients.splice(clients.indexOf(socket.id), 1)
+    console.log(`Client with id ${socket.id} disconnected`)
+  })
 })
 
 app.use('/api', router);
@@ -69,11 +72,7 @@ app.post('/api/chats/:chatId/messages', (req, res, next) => {
   User.findById(req.user._id)
     .then((user) => {
       Message.create({
-        ...req.body,
-        username: user.username,
-        chatId: chatId,
-        expiresIn: Date.now(),
-        owner: req.user._id
+        ...req.body, username: user.username, chatId: chatId, expiresIn: Date.now(), owner: req.user._id
       })
         .then((message) => {
           console.log(message);
@@ -104,8 +103,7 @@ app.use(handleErrors);
 async function start() {
   try {
     await mongoose.connect(MONGO_URL, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true
+      useNewUrlParser: true, useUnifiedTopology: true
     });
     httpServer.listen(PORT, () => {
       console.log(`App has been started port ${PORT}`)

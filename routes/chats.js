@@ -15,11 +15,11 @@ const messagesRouter = require("./messages");
 
 router.get('/', getChats);
 
-router.get('/:id', getChat);
-
 router.get('/friends', getFriends);
 
 router.get('/groups', getGroups);
+
+router.get('/:id', getChat);
 
 router.get('/:id/users', getUsersChat);
 

@@ -50,6 +50,18 @@ const getChats = (req, res, next) => {
     .catch(next)
 }
 
+const getChat = (req, res, next) => {
+  const {id} = req.params
+  Chat.findById(id)
+    .then(chat => {
+      if (!chat) {
+        throw new NotFoundError('Нет чата с таким id')
+      }
+      res.send(chat);
+    })
+    .catch(next)
+}
+
 const getFriends = (req, res, next) => {
   Chat.find({})
     .where('users')
@@ -196,4 +208,4 @@ const updateChat = (req, res, next) => {
     })
 }
 
-module.exports = {getChats, getFriends, getGroups, createPrivateChat, createChat, deleteChat, updateChat, getUsersChat };
+module.exports = {getChats, getChat, getFriends, getGroups, createPrivateChat, createChat, deleteChat, updateChat, getUsersChat };

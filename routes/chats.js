@@ -8,11 +8,14 @@ const {
   deleteChat,
   updateChat,
   getUsersChat,
-  getChats
+  getChats,
+  getChat
 } = require('../controllers/chats');
 const messagesRouter = require("./messages");
 
 router.get('/', getChats);
+
+router.get('/:id', getChat);
 
 router.get('/friends', getFriends);
 

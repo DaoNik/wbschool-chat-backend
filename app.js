@@ -15,6 +15,7 @@ const Message = require('./models/Message');
 const User = require("./models/User");
 const NotFoundError = require("./errors/NotFoundError");
 const ValidationError = require("./errors/ValidationError");
+const AllowsError = require("./errors/AllowsError");
 
 const {PORT} = process.env;
 const {MONGO_URL} = process.env;
@@ -90,10 +91,39 @@ app.post('/api/chats/:chatId/messages', (req, res, next) => {
     .catch(next)
 })
 
+app.delete(
+  '/api/chats/:chatId/messages/:id',
+  (req, res, next) => {
+    const {id} = req.params;
+
+    return Message.findById(id)
+      .then(message => {
+        if (!message) {
+          throw new NotFoundError('Нет сообщения с таким id')
+        }
+        const messageOwnerId = message.owner.toString();
+        if (messageOwnerId !== req.user._id) {
+          throw new AllowsError('Вы не можете удалить это сообщение')
+        }
+        return message;
+      })
+      .then(() => Message.findByIdAndDelete(id))
+      .then((message) => {
+        io.emit('delete message', message._id);
+        res.send(message._id)
+      })
+      .catch((err) => {
+        if (err.name === 'CastError') {
+          return next(new ValidationError('Невалидный id сообщения'))
+        }
+        return next(err);
+      })
+  }
+  )
+
 app.use(/.*/, (req, res, next) => {
   next(new NotFoundError('Страница не найдена'));
 })
-
 
 app.use(errorLogger);
 

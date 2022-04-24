@@ -38,39 +38,39 @@ const getMessages = (req, res, next) => {
 //     })
 // }
 
-const updateMessage = (req, res, next) => {
-  const {id} = req.params;
-  const {text, imageOrFile, formatImage} = req.body;
-  const expiresIn = Date.now();
+// const updateMessage = (req, res, next) => {
+//   const {id} = req.params;
+//   const {text, imageOrFile, formatImage} = req.body;
+//   const expiresIn = Date.now();
+//
+//   return Message.findById(id)
+//     .then(message => {
+//       if (!message) {
+//         throw new NotFoundError('Нет сообщения с таким id')
+//       }
+//       const messageOwnerId = message.owner.toString();
+//       if (messageOwnerId !== req.user._id) {
+//         throw new AllowsError('Вы не можете изменить это сообщение')
+//       }
+//       return message;
+//     })
+//     .then(() => Message.findByIdAndUpdate(
+//       id,
+//       {text, imageOrFile, expiresIn, formatImage},
+//       {new: true, runValidators: true}
+//     ))
+//     .then((message) => {
+//       res.send(message)
+//     })
+//     .catch((err) => {
+//       if (err.name === 'ValidationError') {
+//         next(new ValidationError('Неверно введены данные для текста или файла'))
+//       } else if (err.name === 'CastError') {
+//         next(new ValidationError('Неверный идентификатор сообщения'))
+//       } else {
+//         next(err)
+//       }
+//     })
+// }
 
-  return Message.findById(id)
-    .then(message => {
-      if (!message) {
-        throw new NotFoundError('Нет сообщения с таким id')
-      }
-      const messageOwnerId = message.owner.toString();
-      if (messageOwnerId !== req.user._id) {
-        throw new AllowsError('Вы не можете изменить это сообщение')
-      }
-      return message;
-    })
-    .then(() => Message.findByIdAndUpdate(
-      id,
-      {text, imageOrFile, expiresIn, formatImage},
-      {new: true, runValidators: true}
-    ))
-    .then((message) => {
-      res.send(message)
-    })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        next(new ValidationError('Неверно введены данные для текста или файла'))
-      } else if (err.name === 'CastError') {
-        next(new ValidationError('Неверный идентификатор сообщения'))
-      } else {
-        next(err)
-      }
-    })
-}
-
-module.exports = {getMessages, updateMessage}
+module.exports = {getMessages}

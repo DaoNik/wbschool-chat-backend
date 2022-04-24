@@ -4,7 +4,7 @@ const {createServer} = require("http");
 const helmet = require('helmet');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-const {errors} = require('celebrate');
+const {errors, celebrate, Joi} = require('celebrate');
 const router = require('./routes/index');
 const limiter = require('./middleware/limiter')
 const {requestLogger, errorLogger} = require('./middleware/logger');
@@ -69,30 +69,48 @@ app.get('/api/clients-count', (req, res) => {
   })
 })
 
-app.post('/api/chats/:chatId/messages', (req, res, next) => {
-  const {chatId} = req.params;
-  User.findById(req.user._id)
-    .then((user) => {
-      Message.create({
-        ...req.body, username: user.username, chatId: chatId, expiresIn: Date.now(), owner: req.user._id
-      })
-        .then((message) => {
-          console.log(message);
-          io.emit('message', message);
-          res.send(message);
-        })
-        .catch(err => {
-          if (err.name === 'ValidationError') {
-            return next(new ValidationError('Неверно введены данные для сообщения'))
-          }
-          return next(err);
-        })
+app.post('/api/chats/:chatId/messages',
+  celebrate({
+    params: Joi.object().keys({
+      chatId: Joi.string().length(24).hex(),
+    }),
+    body: Joi.object().keys({
+      text: Joi.string().min(1).max(1000),
+      imageOrFile: Joi.string().base64(),
+      expiresIn: Joi.date(),
+      formatImage: Joi.string().min(10).max(50)
     })
-    .catch(next)
-})
+  }),
+  (req, res, next) => {
+    const {chatId} = req.params;
+    User.findById(req.user._id)
+      .then((user) => {
+        Message.create({
+          ...req.body, username: user.username, chatId: chatId, expiresIn: Date.now(), owner: req.user._id
+        })
+          .then((message) => {
+            console.log(message);
+            io.emit('message', message);
+            res.send(message);
+          })
+          .catch(err => {
+            if (err.name === 'ValidationError') {
+              return next(new ValidationError('Неверно введены данные для сообщения'))
+            }
+            return next(err);
+          })
+      })
+      .catch(next)
+  })
 
 app.delete(
   '/api/chats/:chatId/messages/:id',
+  celebrate({
+    params: Joi.object().keys({
+      id: Joi.string().length(24).hex(),
+      chatId: Joi.string().length(24).hex(),
+    })
+  }),
   (req, res, next) => {
     const {id} = req.params;
 
@@ -119,7 +137,57 @@ app.delete(
         return next(err);
       })
   }
-  )
+)
+
+app.patch('/api/chats/:chatId/messages/:id',
+  celebrate({
+    params: Joi.object().keys({
+      id: Joi.string().length(24).hex(),
+      chatId: Joi.string().length(24).hex(),
+    }),
+    body: Joi.object().keys({
+      text: Joi.string().min(1).max(1000),
+      imageOrFile: Joi.string().base64(),
+      expiresIn: Joi.date(),
+      formatImage: Joi.string().min(10).max(50)
+    })
+  }),
+  (req, res, next) => {
+    const {id} = req.params;
+    const {text, imageOrFile, formatImage} = req.body;
+    const expiresIn = Date.now();
+
+    return Message.findById(id)
+      .then(message => {
+        if (!message) {
+          throw new NotFoundError('Нет сообщения с таким id')
+        }
+        const messageOwnerId = message.owner.toString();
+        if (messageOwnerId !== req.user._id) {
+          throw new AllowsError('Вы не можете изменить это сообщение')
+        }
+        return message;
+      })
+      .then(() => Message.findByIdAndUpdate(
+        id,
+        {text, imageOrFile, expiresIn, formatImage},
+        {new: true, runValidators: true}
+      ))
+      .then((message) => {
+        io.emit('update message', message);
+        res.send(message)
+      })
+      .catch((err) => {
+        if (err.name === 'ValidationError') {
+          next(new ValidationError('Неверно введены данные для текста или файла'))
+        } else if (err.name === 'CastError') {
+          next(new ValidationError('Неверный идентификатор сообщения'))
+        } else {
+          next(err)
+        }
+      })
+
+  })
 
 app.use(/.*/, (req, res, next) => {
   next(new NotFoundError('Страница не найдена'));

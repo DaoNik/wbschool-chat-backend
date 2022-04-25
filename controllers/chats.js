@@ -163,7 +163,7 @@ const deleteChat = (req, res, next) => {
       }
       return chat;
     })
-    .then(() => Chat.findByIdAndDelete(id).then(() => res.send(id)))
+    .then(() => Chat.findByIdAndDelete(id).then(() => res.send({id})))
     .catch((err) => {
       if (err.name === 'CastError') {
         return next(new ValidationError('Невалидный id чата'))

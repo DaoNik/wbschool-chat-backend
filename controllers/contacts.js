@@ -42,7 +42,22 @@ const addContact = (req, res, next) => {
 }
 
 const updateContacts = (req, res, next) => {
-  res.send('Руда обнаружена')
+  const {id} = req.body;
+  Contacts.findOne({owner: req.user._id})
+    .then(contactsUser => {
+      if (!contactsUser) {
+        throw new NotFoundError('Ты кто я тебя не звал')
+      }
+
+      const newContacts = contactsUser.filter(contact => contact._id !== id);
+      Contacts.findByIdAndUpdate(
+        contactsUser._id,
+        {contacts: newContacts},
+        {new: true, runValidators: true}
+      )
+        .then(() => res.send({id}))
+    })
+    .catch(next)
 }
 
 module.exports = { getContacts, addContact, updateContacts };

@@ -41,4 +41,8 @@ const addContact = (req, res, next) => {
     .catch(next)
 }
 
-module.exports = { getContacts, addContact };
+const updateContacts = (req, res, next) => {
+  res.send('Руда обнаружена')
+}
+
+module.exports = { getContacts, addContact, updateContacts };

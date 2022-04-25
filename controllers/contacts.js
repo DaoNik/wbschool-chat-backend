@@ -14,7 +14,7 @@ const getContacts = (req, res, next) => {
 }
 
 const addContact = (req, res, next) => {
-  const { id } = req.body;
+  const {id} = req.body;
   User.findById(id)
     .then(user => {
       if (!user) {
@@ -48,8 +48,7 @@ const updateContacts = (req, res, next) => {
       if (!contactsUser) {
         throw new NotFoundError('Ты кто я тебя не звал')
       }
-
-      const newContacts = contactsUser.filter(contact => contact._id !== id);
+      const newContacts = contactsUser.contacts.filter(contact => contact._id.toString() !== id);
       Contacts.findByIdAndUpdate(
         contactsUser._id,
         {contacts: newContacts},
@@ -60,4 +59,4 @@ const updateContacts = (req, res, next) => {
     .catch(next)
 }
 
-module.exports = { getContacts, addContact, updateContacts };
+module.exports = {getContacts, addContact, updateContacts};

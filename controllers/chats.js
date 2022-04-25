@@ -10,7 +10,7 @@ const getUsersChat = (req, res, next) => {
   const {id} = req.params;
   Chat.findById(id)
     .then(chat => {
-      if (!chat){
+      if (!chat) {
         throw new NotFoundError('Нет чата с таким id');
       }
       User.find({})
@@ -96,8 +96,8 @@ const getGroups = (req, res, next) => {
 }
 
 const createPrivateChat = (req, res, next) => {
-  const { username } = req.query;
-  const { ownerUsername } = req.body;
+  const {username} = req.query;
+  const {ownerUsername} = req.body;
 
   const about = `Личный чат с пользователем ${username}`;
   if (username) {
@@ -109,7 +109,15 @@ const createPrivateChat = (req, res, next) => {
         return user;
       })
       .then(user => {
-        Chat.create({ name: user.username, about: about, avatar: user.avatar, formatImage: user.formatImage, users: [user._id, req.user._id], usernames: [user.username, ownerUsername], owner: req.user._id})
+        Chat.create({
+          name: user.username,
+          about: about,
+          avatar: user.avatar,
+          formatImage: user.formatImage,
+          users: [user._id, req.user._id],
+          usernames: [user.username, ownerUsername],
+          owner: req.user._id
+        })
           .then(chat => {
             res.send(chat);
           })
@@ -155,8 +163,7 @@ const deleteChat = (req, res, next) => {
       }
       return chat;
     })
-    .then(() => Chat.findByIdAndDelete(id))
-    .then(() => res.send(id))
+    .then(() => Chat.findByIdAndDelete(id).then(() => res.send(id)))
     .catch((err) => {
       if (err.name === 'CastError') {
         return next(new ValidationError('Невалидный id чата'))
@@ -208,4 +215,14 @@ const updateChat = (req, res, next) => {
     })
 }
 
-module.exports = {getChats, getChat, getFriends, getGroups, createPrivateChat, createChat, deleteChat, updateChat, getUsersChat };
+module.exports = {
+  getChats,
+  getChat,
+  getFriends,
+  getGroups,
+  createPrivateChat,
+  createChat,
+  deleteChat,
+  updateChat,
+  getUsersChat
+};

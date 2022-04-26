@@ -50,6 +50,14 @@ const getChats = (req, res, next) => {
     .catch(next)
 }
 
+async function fetchChats(socket) {
+  const chats = await Chat.find({})
+    .where('users')
+    .equals(socket.data.payload._id);
+
+  return chats;
+}
+
 const getChat = (req, res, next) => {
   const {id} = req.params
   Chat.findById(id)
@@ -224,5 +232,6 @@ module.exports = {
   createChat,
   deleteChat,
   updateChat,
-  getUsersChat
+  getUsersChat,
+  fetchChats
 };

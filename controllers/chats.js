@@ -7,7 +7,7 @@ const ConflictError = require("../errors/ConflictError");
 
 // Нахрен не надо
 const getUsersChat = (req, res, next) => {
-  const {id} = req.params;
+  const { id } = req.params;
   Chat.findById(id)
     .then(chat => {
       if (!chat) {
@@ -54,12 +54,11 @@ async function fetchChats(socket) {
   const chats = await Chat.find({})
     .where('users')
     .equals(socket.data.payload._id);
-
   return chats;
 }
 
 const getChat = (req, res, next) => {
-  const {id} = req.params
+  const { id } = req.params
   Chat.findById(id)
     .then(chat => {
       if (!chat) {
@@ -104,12 +103,12 @@ const getGroups = (req, res, next) => {
 }
 
 const createPrivateChat = (req, res, next) => {
-  const {username} = req.query;
-  const {ownerUsername} = req.body;
+  const { username } = req.query;
+  const { ownerUsername } = req.body;
 
   const about = `Личный чат с пользователем ${username}`;
   if (username) {
-    User.findOne({username})
+    User.findOne({ username })
       .then(user => {
         if (!user) {
           throw new NotFoundError('Нет такого пользователя')
@@ -146,7 +145,7 @@ const createPrivateChat = (req, res, next) => {
 }
 
 const createChat = (req, res, next) => {
-  Chat.create({...req.body, users: [req.user._id, ...req.body.users], owner: req.user._id})
+  Chat.create({ ...req.body, users: [req.user._id, ...req.body.users], owner: req.user._id })
     .then((chat) => {
       res.send(chat);
     })
@@ -159,7 +158,7 @@ const createChat = (req, res, next) => {
 }
 
 const deleteChat = (req, res, next) => {
-  const {id} = req.params;
+  const { id } = req.params;
   return Chat.findById(id)
     .then(chat => {
       if (!chat) {
@@ -171,7 +170,7 @@ const deleteChat = (req, res, next) => {
       }
       return chat;
     })
-    .then(() => Chat.findByIdAndDelete(id).then(() => res.send({id})))
+    .then(() => Chat.findByIdAndDelete(id).then(() => res.send({ id })))
     .catch((err) => {
       if (err.name === 'CastError') {
         return next(new ValidationError('Невалидный id чата'))
@@ -181,7 +180,7 @@ const deleteChat = (req, res, next) => {
 }
 
 const updateChat = (req, res, next) => {
-  const {id} = req.params;
+  const { id } = req.params;
   const {
     name,
     avatar,
@@ -206,8 +205,8 @@ const updateChat = (req, res, next) => {
     })
     .then(() => Chat.findByIdAndUpdate(
       id,
-      {name, avatar, formatImage, about, users, isNotifications, isRead, isActive},
-      {new: true, runValidators: true}
+      { name, avatar, formatImage, about, users, isNotifications, isRead, isActive },
+      { new: true, runValidators: true }
     ))
     .then((chat) => {
       res.send(chat)

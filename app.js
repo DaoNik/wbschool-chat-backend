@@ -75,6 +75,7 @@ io.on("connection", async (socket) => {
 
   const chats = await fetchChats(socket);
   chats.forEach(chat => socket.join(chat._id.toString()))
+  console.log(io.sockets.adapter.rooms)
 
   socket.on('messages:delete', deleteMessage);
   socket.on('messages:create', createMessage);

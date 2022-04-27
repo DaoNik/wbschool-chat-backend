@@ -1,29 +1,26 @@
 require('dotenv').config();
 const express = require('express');
-const {createServer} = require("http");
+const { createServer } = require("http");
 const helmet = require('helmet');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-const {errors, celebrate, Joi} = require('celebrate');
+const { errors } = require('celebrate');
 const router = require('./routes/index');
 const limiter = require('./middleware/limiter')
-const {requestLogger, errorLogger} = require('./middleware/logger');
+const { requestLogger, errorLogger } = require('./middleware/logger');
 const handleAllowedCors = require('./middleware/handleAllowedCors');
 const handleErrors = require('./middleware/handleErrors');
-const {Server} = require("socket.io");
-const Message = require('./models/Message');
-const User = require("./models/User");
+const { Server } = require("socket.io");
 const NotFoundError = require("./errors/NotFoundError");
-const ValidationError = require("./errors/ValidationError");
-const AllowsError = require("./errors/AllowsError");
-const {fetchChats} = require("./controllers/chats");
-const {deleteMessage, createMessage, updateMessage} = require('./controllers/messages');
+const { fetchChats } = require("./controllers/chats");
+const { deleteMessage, createMessage, updateMessage } = require('./controllers/messages');
 const jwt = require("jsonwebtoken");
-const AuthorizationError = require("./errors/AuthorizationError");
 
-const {PORT} = process.env;
-const {MONGO_URL} = process.env;
-const {JWT_SECRET} = process.env;
+const { createNotification, deleteNotification, clearNotifications } = require('./controllers/notification');
+
+const { PORT } = process.env;
+const { MONGO_URL } = process.env;
+const { JWT_SECRET } = process.env;
 
 const allowedCors = [
   'http://localhost:4200',
@@ -41,7 +38,7 @@ const io = new Server(httpServer, {
   }
 });
 
-app.use(bodyParser.json({limit: '100mb'}));
+app.use(bodyParser.json({ limit: '100mb' }));
 app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
   limit: '100mb', extended: true
 }));
@@ -82,6 +79,11 @@ io.on("connection", async (socket) => {
   socket.on('messages:delete', deleteMessage);
   socket.on('messages:create', createMessage);
   socket.on('messages:update', updateMessage);
+
+  socket.on('notifications:delete', deleteNotification)
+  socket.on('notifications:create', createNotification)
+  socket.on('notifications:clear', clearNotifications)
+
 })
 
 app.use('/api', router);

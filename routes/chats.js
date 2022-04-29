@@ -29,6 +29,8 @@ router.post(
   celebrate({
     body: Joi.object().keys({
       ownerUsername: Joi.string().required(),
+      ownerAvatar: Joi.string().required().base64(),
+      ownerFormatImage: Joi.string(),
       name: Joi.string().min(4).max(40),
       formatImage: Joi.string().min(10).max(50),
       avatar: Joi.string().base64(),

@@ -101,7 +101,7 @@ const getGroups = (req, res, next) => {
 
 const createPrivateChat = (req, res, next) => {
   const { username } = req.query;
-  const { ownerUsername } = req.body;
+  const { ownerUsername, ownerAvatar, ownerFormatImage } = req.body;
 
   const about = `Личный чат с пользователем ${username}`;
   if (username) {
@@ -120,6 +120,10 @@ const createPrivateChat = (req, res, next) => {
           formatImage: user.formatImage,
           users: [user._id, req.user._id],
           usernames: [user.username, ownerUsername],
+          avatars: [
+            { ownerAvatar, ownerFormatImage },
+            { avatar: user.avatar, formateImage: user.formatImage },
+          ],
           owner: req.user._id,
         })
           .then((chat) => {

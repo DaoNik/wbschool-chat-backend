@@ -1,58 +1,62 @@
-const { Schema, model, Types } = require('mongoose');
-const  validator = require('validator');
+const { Schema, model, Types } = require("mongoose");
+const validator = require("validator");
 
 const chatSchema = new Schema({
   name: {
     type: String,
     required: true,
     minLength: 4,
-    maxLength: 40
+    maxLength: 40,
   },
   formatImage: {
     type: String,
     minLength: 10,
-    maxLength: 50
+    maxLength: 50,
   },
   avatar: {
     type: String,
     validate: {
-      validator: (value) => validator.isBase64(value)
-    }
+      validator: (value) => validator.isBase64(value),
+    },
   },
   about: {
     type: String,
     minLength: 4,
     maxLength: 100,
-    default: 'Чат для мемного общения'
+    default: "Чат для мемного общения",
   },
   isNotifications: {
     type: Boolean,
-    default: true
+    default: true,
   },
   isRead: {
     type: Boolean,
-    default: false
+    default: false,
   },
   isActive: {
     type: Boolean,
-    default: false
+    default: false,
   },
   users: {
     type: [Types.ObjectId],
     required: true,
-    ref: 'user',
-    default: []
+    ref: "user",
+    default: [],
   },
   usernames: {
     type: [],
     required: true,
-    default: []
+    default: [],
+  },
+  avatars: {
+    type: [],
+    default: [],
   },
   owner: {
     type: Types.ObjectId,
-    ref: 'user',
-    required: true
+    ref: "user",
+    required: true,
   },
-})
+});
 
-module.exports = model('chat', chatSchema);
+module.exports = model("chat", chatSchema);

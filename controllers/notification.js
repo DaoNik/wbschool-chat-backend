@@ -42,24 +42,27 @@ function createNotification({ notification }) {
   }
 }
 
-function addNotification({ notification, chatId, usersId }) {
+async function addNotification({ notification, chatId, usersId }) {
   try {
-    const socket = this;
-    // Notification.create({
-    //   ...notification,
-    //   expiresIn: Date.now(),
-    //   owner: userId,
-    // }).then((notification) => {
-    //   socket.to(chatId).emit("notifications:create", notification);
-    // });
+    const io = this;
+    const sockets = await io.fetchSockets();
+    console.log("Sockets", sockets);
+    sockets.forEach((socket) => {
+      if (usersId.includes(socket.data.payload._id)) {
+        socket.emit("notifications:create", notification);
+      }
+    });
     usersId.forEach((userId) => {
       Notification.create({
         ...notification,
         expiresIn: Date.now(),
         owner: userId,
+      }).then((notification) => {
+        console.log("Мы здесь", notification);
       });
     });
-    socket.to(chatId).emit("notifications:create", notification);
+    // socket.emit("notifications:create", notification);
+    // socket.to(chatId).emit("notifications:create", notification);
   } catch (err) {
     console.log(err);
   }
@@ -120,12 +123,9 @@ function deleteNotification({ notificationId }) {
 function clearNotifications() {
   try {
     const socket = this;
-    Notification.deleteMany(
-      { owner: socket.data.payload._id },
-      (notifications) => {
-        socket.emit("notifications:clear", notifications);
-      }
-    );
+    Notification.deleteMany({ owner: socket.data.payload._id }, () => {
+      socket.emit("notifications:clear", []);
+    });
   } catch (err) {
     console.log(err);
   }

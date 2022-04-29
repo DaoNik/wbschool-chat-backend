@@ -26,6 +26,7 @@ const {
   clearNotifications,
   addNotification,
 } = require("./controllers/notification");
+const Notification = require("./models/Notification");
 
 const { PORT } = process.env;
 const { MONGO_URL } = process.env;
@@ -90,7 +91,6 @@ io.on("connection", async (socket) => {
 
   const chats = await fetchChats(socket);
   chats.forEach((chat) => socket.join(chat._id.toString()));
-  console.log(io.sockets.adapter.rooms);
 
   socket.on("messages:delete", deleteMessage);
   socket.on("messages:create", createMessage);
@@ -99,7 +99,30 @@ io.on("connection", async (socket) => {
   socket.on("notifications:delete", deleteNotification);
   socket.on("notifications:create", createNotification);
   socket.on("notifications:clear", clearNotifications);
-  socket.on("notifications:addNotification", addNotification);
+  socket.on(
+    "notifications:addNotification",
+    async ({ notification, chatId, usersId }) => {
+      try {
+        const sockets = await io.fetchSockets();
+        sockets.forEach((socket) => {
+          if (usersId.includes(socket.data.payload._id)) {
+            socket.emit("notifications:addInGroup", notification);
+          }
+        });
+        usersId.forEach((userId) => {
+          Notification.create({
+            ...notification,
+            expiresIn: Date.now(),
+            owner: userId,
+          }).then((notification) => {
+            console.log("Мы здесь", notification);
+          });
+        });
+      } catch (err) {
+        console.log(err);
+      }
+    }
+  );
 });
 
 app.use("/api", router);

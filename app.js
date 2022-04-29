@@ -1,47 +1,60 @@
-require('dotenv').config();
-const express = require('express');
+require("dotenv").config();
+const express = require("express");
 const { createServer } = require("http");
-const helmet = require('helmet');
-const bodyParser = require('body-parser');
-const mongoose = require('mongoose');
-const { errors } = require('celebrate');
-const router = require('./routes/index');
-const limiter = require('./middleware/limiter')
-const { requestLogger, errorLogger } = require('./middleware/logger');
-const handleAllowedCors = require('./middleware/handleAllowedCors');
-const handleErrors = require('./middleware/handleErrors');
+const helmet = require("helmet");
+const bodyParser = require("body-parser");
+const mongoose = require("mongoose");
+const { errors } = require("celebrate");
+const router = require("./routes/index");
+const limiter = require("./middleware/limiter");
+const { requestLogger, errorLogger } = require("./middleware/logger");
+const handleAllowedCors = require("./middleware/handleAllowedCors");
+const handleErrors = require("./middleware/handleErrors");
 const { Server } = require("socket.io");
 const NotFoundError = require("./errors/NotFoundError");
 const { fetchChats } = require("./controllers/chats");
-const { deleteMessage, createMessage, updateMessage } = require('./controllers/messages');
+const {
+  deleteMessage,
+  createMessage,
+  updateMessage,
+} = require("./controllers/messages");
 const jwt = require("jsonwebtoken");
 
-const { createNotification, deleteNotification, clearNotifications } = require('./controllers/notification');
+const {
+  createNotification,
+  deleteNotification,
+  clearNotifications,
+  addNotification,
+} = require("./controllers/notification");
 
 const { PORT } = process.env;
 const { MONGO_URL } = process.env;
 const { JWT_SECRET } = process.env;
 
 const allowedCors = [
-  'http://localhost:4200',
-  'http://localhost:4201',
-  'http://localhost:4202',
-  'https://wbschool-chat.ru'
-]
+  "http://localhost:4200",
+  "http://localhost:4201",
+  "http://localhost:4202",
+  "https://wbschool-chat.ru",
+];
 
 const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
-  path: '/api/socket',
+  path: "/api/socket",
   cors: {
-    origin: allowedCors
-  }
+    origin: allowedCors,
+  },
 });
 
-app.use(bodyParser.json({ limit: '100mb' }));
-app.use(bodyParser.urlencoded({     // to support URL-encoded bodies
-  limit: '100mb', extended: true
-}));
+app.use(bodyParser.json({ limit: "100mb" }));
+app.use(
+  bodyParser.urlencoded({
+    // to support URL-encoded bodies
+    limit: "100mb",
+    extended: true,
+  })
+);
 app.use(helmet());
 
 app.use(requestLogger);
@@ -53,7 +66,9 @@ app.use(limiter);
 let clients = [];
 
 io.on("connection", async (socket) => {
-  console.log(`Client with id ${socket.id} connected ${socket.handshake.auth.token}`)
+  console.log(
+    `Client with id ${socket.id} connected ${socket.handshake.auth.token}`
+  );
   clients.push(socket.id);
 
   let payload;
@@ -61,40 +76,40 @@ io.on("connection", async (socket) => {
   try {
     payload = jwt.verify(socket.handshake.auth.token, JWT_SECRET);
   } catch (e) {
-    socket.on('disconnect', () => {
-      clients.splice(clients.indexOf(socket.id), 1)
-      console.log(`Client with id ${socket.id} disconnected`)
-    })
+    socket.on("disconnect", () => {
+      clients.splice(clients.indexOf(socket.id), 1);
+      console.log(`Client with id ${socket.id} disconnected`);
+    });
   }
   socket.data.payload = payload;
 
-  socket.on('disconnect', () => {
-    clients.splice(clients.indexOf(socket.id), 1)
-    console.log(`Client with id ${socket.id} disconnected`)
-  })
+  socket.on("disconnect", () => {
+    clients.splice(clients.indexOf(socket.id), 1);
+    console.log(`Client with id ${socket.id} disconnected`);
+  });
 
   const chats = await fetchChats(socket);
-  chats.forEach(chat => socket.join(chat._id.toString()))
-  console.log(io.sockets.adapter.rooms)
+  chats.forEach((chat) => socket.join(chat._id.toString()));
+  console.log(io.sockets.adapter.rooms);
 
-  socket.on('messages:delete', deleteMessage);
-  socket.on('messages:create', createMessage);
-  socket.on('messages:update', updateMessage);
+  socket.on("messages:delete", deleteMessage);
+  socket.on("messages:create", createMessage);
+  socket.on("messages:update", updateMessage);
 
-  socket.on('notifications:delete', deleteNotification)
-  socket.on('notifications:create', createNotification)
-  socket.on('notifications:clear', clearNotifications)
+  socket.on("notifications:delete", deleteNotification);
+  socket.on("notifications:create", createNotification);
+  socket.on("notifications:clear", clearNotifications);
+  socket.on("notifications:addNotification", addNotification);
+});
 
-})
+app.use("/api", router);
 
-app.use('/api', router);
-
-app.get('/api/clients-count', (req, res) => {
-  console.log('Count', io.engine.clientsCount)
+app.get("/api/clients-count", (req, res) => {
+  console.log("Count", io.engine.clientsCount);
   res.send({
     count: io.engine.clientsCount,
-  })
-})
+  });
+});
 
 // app.post('/api/chats/:chatId/messages',
 //   celebrate({
@@ -217,8 +232,8 @@ app.get('/api/clients-count', (req, res) => {
 //   })
 
 app.use(/.*/, (req, res, next) => {
-  next(new NotFoundError('Страница не найдена'));
-})
+  next(new NotFoundError("Страница не найдена"));
+});
 
 app.use(errorLogger);
 
@@ -229,13 +244,14 @@ app.use(handleErrors);
 async function start() {
   try {
     await mongoose.connect(MONGO_URL, {
-      useNewUrlParser: true, useUnifiedTopology: true
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
     });
     httpServer.listen(PORT, () => {
-      console.log(`App has been started port ${PORT}`)
-    })
+      console.log(`App has been started port ${PORT}`);
+    });
   } catch (e) {
-    console.log('Server error', e.message);
+    console.log("Server error", e.message);
     process.exit(1);
   }
 }

@@ -1,18 +1,18 @@
-const Notification = require('../models/Notification');
+const Notification = require("../models/Notification");
 const ValidationError = require("../errors/ValidationError");
 const NotFoundError = require("../errors/NotFoundError");
 const AllowsError = require("../errors/AllowsError");
-const User = require('../models/User');
+const User = require("../models/User");
 
 const getNotifications = (req, res, next) => {
   Notification.find({})
-    .where('owner')
+    .where("owner")
     .equals(req.user._id)
     .then((notification) => {
-      res.send(notification)
+      res.send(notification);
     })
     .catch(next);
-}
+};
 
 // const createNotification = (req, res, next) => {
 //   Notification.create({...req.body, expiresIn: Date.now(), owner: req.user._id})
@@ -31,12 +31,37 @@ function createNotification({ notification }) {
   try {
     const socket = this;
     Notification.create({
-      ...notification, expiresIn: Date.now(), owner: socket.data.payload._id
-    }).then(notification => {
-      socket.emit('notifications:create', notification);
-    })
+      ...notification,
+      expiresIn: Date.now(),
+      owner: socket.data.payload._id,
+    }).then((notification) => {
+      socket.emit("notifications:create", notification);
+    });
   } catch (err) {
-    console.log(err)
+    console.log(err);
+  }
+}
+
+function addNotification({ notification, chatId, usersId }) {
+  try {
+    const socket = this;
+    // Notification.create({
+    //   ...notification,
+    //   expiresIn: Date.now(),
+    //   owner: userId,
+    // }).then((notification) => {
+    //   socket.to(chatId).emit("notifications:create", notification);
+    // });
+    usersId.forEach((userId) => {
+      Notification.create({
+        ...notification,
+        expiresIn: Date.now(),
+        owner: userId,
+      });
+    });
+    socket.to(chatId).emit("notifications:create", notification);
+  } catch (err) {
+    console.log(err);
   }
 }
 
@@ -63,16 +88,16 @@ function createNotification({ notification }) {
 
 //       return next(err);
 //     })
-// }s
-function deleteNotification({notificationId} ) {
+// }
+
+function deleteNotification({ notificationId }) {
   try {
     const socket = this;
-    Notification.findByIdAndDelete(notificationId)
-      .then(() => {
-        socket.emit('notifications:delete',  notificationId)
-      })
+    Notification.findByIdAndDelete(notificationId).then(() => {
+      socket.emit("notifications:delete", notificationId);
+    });
   } catch (err) {
-    console.log(err)
+    console.log(err);
   }
 }
 // const clearNotifications = (req, res, next) => {
@@ -95,13 +120,21 @@ function deleteNotification({notificationId} ) {
 function clearNotifications() {
   try {
     const socket = this;
-    Notification.deleteMany({ owner: socket.data.payload._id },
+    Notification.deleteMany(
+      { owner: socket.data.payload._id },
       (notifications) => {
-        socket.emit('notifications:clear', notifications)
-      })
+        socket.emit("notifications:clear", notifications);
+      }
+    );
   } catch (err) {
     console.log(err);
   }
 }
 
-module.exports = { getNotifications, deleteNotification, clearNotifications, createNotification };
+module.exports = {
+  getNotifications,
+  deleteNotification,
+  clearNotifications,
+  createNotification,
+  addNotification,
+};

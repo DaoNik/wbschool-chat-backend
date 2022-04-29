@@ -256,16 +256,16 @@ const exitChat = (req, res, next) => {
           return user;
         }
       });
-      return { owner, newUsers };
+      if (newUsers.length <= 0) {
+        return Chat.findByIdAndDelete(id).then(() => res.send({ id }));
+      } else {
+        Chat.findByIdAndUpdate(
+          id,
+          { owner, users: newUsers },
+          { new: true, runValidators: true }
+        ).then((chat) => res.send({ chat }));
+      }
     })
-    .then(({ owner, newUsers }) =>
-      Chat.findByIdAndUpdate(
-        id,
-        { owner, users: newUsers },
-        { new: true, runValidators: true }
-      )
-    )
-    .then((chat) => res.send(chat))
     .catch((err) => {
       if (err.name === "ValidationError") {
         next(new ValidationError("Неверно введены данные для чата"));

@@ -1,5 +1,5 @@
-const Chat = require('../models/Chat');
-const User = require('../models/User');
+const Chat = require("../models/Chat");
+const User = require("../models/User");
 const ValidationError = require("../errors/ValidationError");
 const AllowsError = require("../errors/AllowsError");
 const NotFoundError = require("../errors/NotFoundError");
@@ -9,98 +9,95 @@ const ConflictError = require("../errors/ConflictError");
 const getUsersChat = (req, res, next) => {
   const { id } = req.params;
   Chat.findById(id)
-    .then(chat => {
+    .then((chat) => {
       if (!chat) {
-        throw new NotFoundError('Нет чата с таким id');
+        throw new NotFoundError("Нет чата с таким id");
       }
       User.find({})
-        .where('_id')
+        .where("_id")
         .in(chat.users)
-        .then(users => {
+        .then((users) => {
           console.log(users);
           const usersChat = [];
-          users.map(user => {
+          users.map((user) => {
             const newUser = user.toObject();
             delete newUser.userRights;
             delete newUser.email;
             delete newUser.about;
             delete newUser.__v;
             usersChat.push(newUser);
-          })
+          });
           res.send(usersChat);
-        })
+        });
     })
     .catch((err) => {
-      if (err.name === 'MongoServerError' && err.code === 11000) {
-        return next(
-          ConflictError('Это имя чата уже занято')
-        )
+      if (err.name === "MongoServerError" && err.code === 11000) {
+        return next(ConflictError("Это имя чата уже занято"));
       }
       return next(err);
-    })
-}
+    });
+};
 
 const getChats = (req, res, next) => {
   Chat.find({})
-    .where('users')
+    .where("users")
     .equals(req.user._id)
     .then((chats) => {
       res.send(chats);
     })
-    .catch(next)
-}
+    .catch(next);
+};
 
 async function fetchChats(socket) {
   const chats = await Chat.find({})
-    .where('users')
+    .where("users")
     .equals(socket.data.payload._id);
   return chats;
 }
 
 const getChat = (req, res, next) => {
-  const { id } = req.params
+  const { id } = req.params;
   Chat.findById(id)
-    .then(chat => {
+    .then((chat) => {
       if (!chat) {
-        throw new NotFoundError('Нет чата с таким id')
+        throw new NotFoundError("Нет чата с таким id");
       }
       res.send(chat);
     })
-    .catch(next)
-}
+    .catch(next);
+};
 
 const getFriends = (req, res, next) => {
   Chat.find({})
-    .where('users')
+    .where("users")
     .equals(req.user._id)
     .then((chats) => {
       const newArr = [];
-      chats.map(chat => {
+      chats.map((chat) => {
         if (chat.users.length <= 2) {
           newArr.push(chat);
         }
-      })
+      });
       res.send(newArr);
     })
     .catch(next);
-}
-
+};
 
 const getGroups = (req, res, next) => {
   Chat.find({})
-    .where('users')
+    .where("users")
     .equals(req.user._id)
     .then((chats) => {
       const newArr = [];
-      chats.map(chat => {
+      chats.map((chat) => {
         if (chat.users.length > 2) {
           newArr.push(chat);
         }
-      })
+      });
       res.send(newArr);
     })
-    .catch(next)
-}
+    .catch(next);
+};
 
 const createPrivateChat = (req, res, next) => {
   const { username } = req.query;
@@ -109,13 +106,13 @@ const createPrivateChat = (req, res, next) => {
   const about = `Личный чат с пользователем ${username}`;
   if (username) {
     User.findOne({ username })
-      .then(user => {
+      .then((user) => {
         if (!user) {
-          throw new NotFoundError('Нет такого пользователя')
+          throw new NotFoundError("Нет такого пользователя");
         }
         return user;
       })
-      .then(user => {
+      .then((user) => {
         Chat.create({
           name: user.username,
           about: about,
@@ -123,61 +120,65 @@ const createPrivateChat = (req, res, next) => {
           formatImage: user.formatImage,
           users: [user._id, req.user._id],
           usernames: [user.username, ownerUsername],
-          owner: req.user._id
+          owner: req.user._id,
         })
-          .then(chat => {
+          .then((chat) => {
             res.send(chat);
           })
-          .catch(err => {
-            if (err.name === 'ValidationError') {
-              return next(new ValidationError('Неверно введены данные для чата'))
-            }
-            if (err.name === 'MongoServerError' && err.code === 11000) {
+          .catch((err) => {
+            if (err.name === "ValidationError") {
               return next(
-                new ConflictError('Данный чат уже существует')
-              )
+                new ValidationError("Неверно введены данные для чата")
+              );
+            }
+            if (err.name === "MongoServerError" && err.code === 11000) {
+              return next(new ConflictError("Данный чат уже существует"));
             }
             return next(err);
-          })
+          });
       })
-      .catch(next)
+      .catch(next);
   }
-}
+};
 
 const createChat = (req, res, next) => {
-  Chat.create({ ...req.body, users: [req.user._id, ...req.body.users], owner: req.user._id })
+  Chat.create({
+    ...req.body,
+    users: [req.user._id, ...req.body.users],
+    owner: req.user._id,
+  })
     .then((chat) => {
       res.send(chat);
     })
-    .catch(err => {
-      if (err.name === 'ValidationError') {
-        return next(new ValidationError('Неверно введены данные для чата'))
+    .catch((err) => {
+      if (err.name === "ValidationError") {
+        return next(new ValidationError("Неверно введены данные для чата"));
       }
       return next(err);
-    })
-}
+    });
+};
 
 const deleteChat = (req, res, next) => {
   const { id } = req.params;
   return Chat.findById(id)
-    .then(chat => {
+    .then((chat) => {
       if (!chat) {
-        throw new NotFoundError('Нет чата с таким id');
+        throw new NotFoundError("Нет чата с таким id");
       }
       const chatOwnerId = chat.owner.toString();
       if (chatOwnerId !== req.user._id) {
-        throw new AllowsError('Вы не можете удалить этот чат')
+        throw new AllowsError("Вы не можете удалить этот чат");
       }
       return chat;
     })
     .then(() => Chat.findByIdAndDelete(id).then(() => res.send({ id })))
     .catch((err) => {
-      if (err.name === 'CastError') {
-        return next(new ValidationError('Невалидный id чата'))
+      if (err.name === "CastError") {
+        return next(new ValidationError("Невалидный id чата"));
       }
       return next(err);
-    })
-}
+    });
+};
 
 const updateChat = (req, res, next) => {
   const { id } = req.params;
@@ -189,38 +190,92 @@ const updateChat = (req, res, next) => {
     users,
     isNotifications,
     isRead,
-    isActive
+    isActive,
   } = req.body;
 
   return Chat.findById(id)
     .then((chat) => {
       if (!chat) {
-        throw new NotFoundError('Нет чата с таким id')
+        throw new NotFoundError("Нет чата с таким id");
       }
       const chatOwnerId = chat.owner.toString();
       if (chatOwnerId !== req.user._id) {
-        throw new AllowsError('Вы не можете изменить этот чат');
+        throw new AllowsError("Вы не можете изменить этот чат");
       }
       return chat;
     })
-    .then(() => Chat.findByIdAndUpdate(
-      id,
-      { name, avatar, formatImage, about, users, isNotifications, isRead, isActive },
-      { new: true, runValidators: true }
-    ))
+    .then(() =>
+      Chat.findByIdAndUpdate(
+        id,
+        {
+          name,
+          avatar,
+          formatImage,
+          about,
+          users,
+          isNotifications,
+          isRead,
+          isActive,
+        },
+        { new: true, runValidators: true }
+      )
+    )
     .then((chat) => {
-      res.send(chat)
+      res.send(chat);
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        next(new ValidationError('Неверно введены данные для чата'))
-      } else if (err.name === 'CastError') {
-        next(new ValidationError('Неверный идентификатор чата'))
+      if (err.name === "ValidationError") {
+        next(new ValidationError("Неверно введены данные для чата"));
+      } else if (err.name === "CastError") {
+        next(new ValidationError("Неверный идентификатор чата"));
       } else {
-        next(err)
+        next(err);
       }
+    });
+};
+
+const exitChat = (req, res, next) => {
+  const { id } = req.params;
+  let { owner } = req.body;
+
+  return Chat.findById(id)
+    .then((chat) => {
+      if (!chat) {
+        throw new NotFoundError("Нет чата с таким id");
+      }
+      const chatOwnerId = chat.owner.toString();
+      if (chatOwnerId === req.user._id && !owner) {
+        owner = chat.users.find((user) => {
+          if (user._id.toString() !== chatOwnerId) {
+            return user;
+          }
+        });
+      }
+      const newUsers = chat.users.filter((user) => {
+        if (user._id.toString() !== req.user._id) {
+          return user;
+        }
+      });
+      return { owner, newUsers };
     })
-}
+    .then(({ owner, newUsers }) =>
+      Chat.findByIdAndUpdate(
+        id,
+        { owner, users: newUsers },
+        { new: true, runValidators: true }
+      )
+    )
+    .then((chat) => res.send(chat))
+    .catch((err) => {
+      if (err.name === "ValidationError") {
+        next(new ValidationError("Неверно введены данные для чата"));
+      } else if (err.name === "CastError") {
+        next(new ValidationError("Неверный идентификатор чата"));
+      } else {
+        next(err);
+      }
+    });
+};
 
 module.exports = {
   getChats,
@@ -232,5 +287,6 @@ module.exports = {
   deleteChat,
   updateChat,
   getUsersChat,
-  fetchChats
+  fetchChats,
+  exitChat,
 };

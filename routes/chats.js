@@ -1,5 +1,5 @@
-const router = require('express').Router();
-const {celebrate, Joi} = require('celebrate');
+const router = require("express").Router();
+const { celebrate, Joi } = require("celebrate");
 const {
   getFriends,
   getGroups,
@@ -9,22 +9,23 @@ const {
   updateChat,
   getUsersChat,
   getChats,
-  getChat
-} = require('../controllers/chats');
+  getChat,
+  exitChat,
+} = require("../controllers/chats");
 const messagesRouter = require("./messages");
 
-router.get('/', getChats);
+router.get("/", getChats);
 
-router.get('/friends', getFriends);
+router.get("/friends", getFriends);
 
-router.get('/groups', getGroups);
+router.get("/groups", getGroups);
 
-router.get('/:id', getChat);
+router.get("/:id", getChat);
 
-router.get('/:id/users', getUsersChat);
+router.get("/:id/users", getUsersChat);
 
 router.post(
-  '/private',
+  "/private",
   celebrate({
     body: Joi.object().keys({
       ownerUsername: Joi.string().required(),
@@ -35,14 +36,14 @@ router.post(
       isNotifications: Joi.boolean(),
       isRead: Joi.boolean(),
       isActive: Joi.boolean(),
-      users: Joi.array()
-    })
+      users: Joi.array(),
+    }),
   }),
   createPrivateChat
-)
+);
 
 router.post(
-  '/',
+  "/",
   celebrate({
     body: Joi.object().keys({
       name: Joi.string().required().min(4).max(40),
@@ -52,27 +53,27 @@ router.post(
       isNotifications: Joi.boolean(),
       isRead: Joi.boolean(),
       isActive: Joi.boolean(),
-      users: Joi.array().required()
-    })
+      users: Joi.array().required(),
+    }),
   }),
   createChat
-)
+);
 
 router.delete(
-  '/:id',
+  "/:id",
   celebrate({
     params: Joi.object().keys({
-      id: Joi.string().length(24).hex()
-    })
+      id: Joi.string().length(24).hex(),
+    }),
   }),
   deleteChat
-)
+);
 
 router.patch(
-  '/:id',
+  "/:id",
   celebrate({
     params: Joi.object().keys({
-      id: Joi.string().length(24).hex()
+      id: Joi.string().length(24).hex(),
     }),
     body: Joi.object().keys({
       name: Joi.string().min(4).max(40),
@@ -82,12 +83,25 @@ router.patch(
       isNotifications: Joi.boolean(),
       isRead: Joi.boolean(),
       isActive: Joi.boolean(),
-      users: Joi.array()
-    })
+      users: Joi.array(),
+    }),
   }),
   updateChat
-)
+);
 
-router.use('/', messagesRouter);
+router.patch(
+  "/:id/exit",
+  celebrate({
+    params: Joi.object().keys({
+      id: Joi.string().length(24).hex(),
+    }),
+    body: Joi.object().keys({
+      owner: Joi.string().length(24).hex(),
+    }),
+  }),
+  exitChat
+);
+
+router.use("/", messagesRouter);
 
 module.exports = router;

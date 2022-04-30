@@ -98,23 +98,12 @@ PATCH /chats/:chatId/exit убирает пользователя из чата,
 
 GET /chats/:chatId/messages возвращает список сообщений чата
 
-POST /chats/:chatId/messages создает новое сообщение и возвращает его с датой создания, имеет:
-- обязательно поле text длинной до тысячи символов
-- необязательное поле imageOrFile строка в формате base64
+#### Threads
 
-DELETE /chats/:chatId/messages/:id удаляет сообщение и возвращает его id, имеет:
-- обязательный параметр id длиной 24 символа
+GET /chats/:chatId/messages/threads возвращает список тредов в которых вы писали комменты
 
-PATCH /chats/:chatId/messages/:id изменяет сообщение и возвращает его с датой обновления сообщения, имеет:
-- необязательное поле text длиной до тысячи символов
-- необязательное поле imageOrFile строка в формате base64
+GET /chats/:chatId/messages/:messageId/thread возвращет тред для конкретного сообщения
 
 #### Notifications
 
 GET /users/notifications - возвращает все уведомление  
-
-POST /users/notifications - создает новое уведомление и возвращает его с датой создания, id уведомления и id создателя. Имеет:
-- обязательное поле text длиной до трехсот символов
-
-DELETE /users/notifications/notificationId - удаляет уведомление и возвращает его id, имеет:
-- обязательный параметр id длиной 24 символа

@@ -1,24 +1,27 @@
-const {Schema, model, Types} = require('mongoose');
-const validator = require('validator');
+const { Schema, model, Types } = require("mongoose");
+const validator = require("validator");
 
-const notificationSchema = new Schema({
-  expiresIn: {
-    type: Date,
-    validate: {
-      validator: (v) => validator.isDate(v)
-    }
+const notificationSchema = new Schema(
+  {
+    expiresIn: {
+      type: Date,
+      validate: {
+        validator: (v) => validator.isDate(v),
+      },
+    },
+    owner: {
+      type: Types.ObjectId,
+      ref: "user",
+      required: true,
+    },
+    text: {
+      type: String,
+      required: true,
+      minLength: 1,
+      maxLength: 300,
+    },
   },
-  owner: {
-    type: Types.ObjectId,
-    ref: 'user',
-    required: true
-  },
-  text: {
-    type: String,
-    required: true,
-    minLength: 1,
-    maxLength: 300
-  }
-})
+  { versionKey: false }
+);
 
-module.exports = model('notification', notificationSchema);
+module.exports = model("notification", notificationSchema);

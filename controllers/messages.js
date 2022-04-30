@@ -3,6 +3,7 @@ const User = require("../models/User");
 const NotFoundError = require("../errors/NotFoundError");
 const AllowsError = require("../errors/AllowsError");
 const ValidationError = require("../errors/ValidationError");
+const Thread = require("../models/Thread");
 
 const getMessages = (req, res, next) => {
   const { chatId } = req.params;
@@ -24,6 +25,8 @@ async function createMessage({ chatId, message }) {
       expiresIn: Date.now(),
       owner: currentUser._id,
     });
+    const newThread = await Thread.create({ owner: currentMessage._id });
+    console.log("thread", newThread);
     console.log("message", currentMessage);
     socket.emit(`messages:create`, currentMessage);
     socket.to(chatId).emit(`messages:create`, currentMessage);

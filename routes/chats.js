@@ -20,9 +20,25 @@ router.get("/friends", getFriends);
 
 router.get("/groups", getGroups);
 
-router.get("/:id", getChat);
+router.get(
+  "/:id",
+  celebrate({
+    params: Joi.object().keys({
+      id: Joi.string().length(24).hex(),
+    }),
+  }),
+  getChat
+);
 
-router.get("/:id/users", getUsersChat);
+router.get(
+  "/:id/users",
+  celebrate({
+    params: Joi.object().keys({
+      id: Joi.string().length(24).hex(),
+    }),
+  }),
+  getUsersChat
+);
 
 router.post(
   "/private",

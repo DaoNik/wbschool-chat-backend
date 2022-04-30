@@ -122,7 +122,7 @@ const createPrivateChat = (req, res, next) => {
           usernames: [user.username, ownerUsername],
           avatars: [
             { ownerAvatar, ownerFormatImage },
-            { avatar: user.avatar, formateImage: user.formatImage },
+            { avatar: user.avatar, formatImage: user.formatImage },
           ],
           owner: req.user._id,
         })

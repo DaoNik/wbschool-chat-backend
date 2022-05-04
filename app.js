@@ -24,9 +24,13 @@ const {
   createNotification,
   deleteNotification,
   clearNotifications,
-  addNotification,
 } = require("./controllers/notification");
 const Notification = require("./models/Notification");
+const {
+  createComment,
+  deleteComment,
+  updateComment,
+} = require("./controllers/threads");
 
 const { PORT } = process.env;
 const { MONGO_URL } = process.env;
@@ -96,6 +100,10 @@ io.on("connection", async (socket) => {
   socket.on("messages:create", createMessage);
   socket.on("messages:update", updateMessage);
 
+  socket.on("comments:create", createComment);
+  socket.on("comments:delete", deleteComment);
+  socket.on("comments:update", updateComment);
+
   socket.on("notifications:delete", deleteNotification);
   socket.on("notifications:create", createNotification);
   socket.on("notifications:clear", clearNotifications);
@@ -106,6 +114,7 @@ io.on("connection", async (socket) => {
         const sockets = await io.fetchSockets();
         sockets.forEach((socket) => {
           if (usersId.includes(socket.data.payload._id)) {
+            // проверить, что notifications:create
             socket.emit("notifications:addInGroup", notification);
           }
         });

@@ -23,6 +23,10 @@ const threadSchema = new Schema(
             type: String,
             required: true,
           },
+          text: {
+            type: String,
+            required: true,
+          },
           imageOrFile: {
             type: String,
             validate: {

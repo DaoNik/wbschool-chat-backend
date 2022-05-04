@@ -42,32 +42,6 @@ function createNotification({ notification }) {
   }
 }
 
-async function addNotification({ notification, chatId, usersId }) {
-  try {
-    const io = this;
-    const sockets = await io.fetchSockets();
-    console.log("Sockets", sockets);
-    sockets.forEach((socket) => {
-      if (usersId.includes(socket.data.payload._id)) {
-        socket.emit("notifications:create", notification);
-      }
-    });
-    usersId.forEach((userId) => {
-      Notification.create({
-        ...notification,
-        expiresIn: Date.now(),
-        owner: userId,
-      }).then((notification) => {
-        console.log("Мы здесь", notification);
-      });
-    });
-    // socket.emit("notifications:create", notification);
-    // socket.to(chatId).emit("notifications:create", notification);
-  } catch (err) {
-    console.log(err);
-  }
-}
-
 // const deleteNotification = (req, res, next) => {
 //   const { id } = req.params;
 
@@ -136,5 +110,4 @@ module.exports = {
   deleteNotification,
   clearNotifications,
   createNotification,
-  addNotification,
 };

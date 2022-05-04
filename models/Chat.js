@@ -54,10 +54,15 @@ const chatSchema = new Schema(
       default: [],
     },
     owner: {
-      type: Types.ObjectId,
+      type: [Types.ObjectId],
       ref: "user",
       required: true,
     },
+    isPrivate: {
+      type: Boolean,
+      default: false,
+      required: true
+    }
   },
   { versionKey: false }
 );

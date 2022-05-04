@@ -11,6 +11,7 @@ const {
   getChats,
   getChat,
   exitChat,
+  ownersChat,
 } = require("../controllers/chats");
 const messagesRouter = require("./messages");
 
@@ -38,6 +39,16 @@ router.get(
     }),
   }),
   getUsersChat
+);
+
+router.post(
+  "/owners",
+  celebrate({
+    body: Joi.object().keys({
+      userId: Joi.string().length(24).hex(),
+    }),
+  }),
+  ownersChat
 );
 
 router.post(

@@ -17,7 +17,6 @@ const getUsersChat = (req, res, next) => {
         .where("_id")
         .in(chat.users)
         .then((users) => {
-          console.log(users);
           const usersChat = [];
           users.map((user) => {
             const newUser = user.toObject();

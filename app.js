@@ -137,7 +137,6 @@ io.on("connection", async (socket) => {
 app.use("/api", router);
 
 app.get("/api/clients-count", (req, res) => {
-  console.log("Count", io.engine.clientsCount);
   res.send({
     count: io.engine.clientsCount,
   });

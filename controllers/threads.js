@@ -23,7 +23,7 @@ const getThreads = (req, res, next) => {
 const getThread = (req, res, next) => {
   const { messageId } = req.params;
 
-  Thread.find({})
+  Thread.findOne({})
     .where("owner")
     .equals(messageId)
     .then((thread) => {
@@ -53,8 +53,6 @@ async function createComment({ chatId, threadId, comment }) {
       { comments: newComments },
       { new: true, runValidators: true }
     );
-    console.log("thread", newThread);
-    console.log("comment", newComment);
     socket.emit(`comments:create`, { chatId, threadId, comment: newComment });
     socket
       .to(chatId)
@@ -87,7 +85,6 @@ async function deleteComment({ chatId, threadId, authorId, date }) {
     socket
       .to(chatId)
       .emit("comments:delete", { chatId, threadId, authorId, date });
-    console.log("newThread", newThread);
   } catch (err) {
     console.log(err);
   }
@@ -114,7 +111,6 @@ async function updateComment({ chatId, threadId, comment }) {
     );
     socket.emit("comments:delete", { chatId, threadId, comment });
     socket.to(chatId).emit("comments:delete", { chatId, threadId, comment });
-    console.log("newThread", newThread);
   } catch (err) {
     console.log(err);
   }

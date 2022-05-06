@@ -61,12 +61,6 @@ const getGroups = (req, res, next) => {
     .where("users")
     .equals(req.user._id)
     .then((chats) => {
-      // const newArr = [];
-      // chats.map((chat) => {
-      //   if (chat.isPrivate === false) {
-      //     newArr.push(chat);
-      //   }
-      // });
       res.send(chats);
     })
     .catch(next);

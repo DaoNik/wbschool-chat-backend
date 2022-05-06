@@ -109,9 +109,9 @@ const createPrivateChat = (req, res, next) => {
 
 const ownersChat = (req, res, next) => {
   const { userId } = req.body;
-  PrivateChat.find({})
+  PrivateChat.findOne({})
     .where("owners")
-    .equals([req.user._id, userId] || [userId, req.user._id])
+    .all([req.user._id, userId] || [userId, req.user._id])
     .then((chats) => {
       res.send(chats);
     })
@@ -164,15 +164,6 @@ const exitChat = (req, res, next) => {
       if (!chat) {
         throw new NotFoundError("Нет чата с таким id");
       }
-      // chat.owner.forEach(ownerId => {
-      //   if (ownerId.toString() === req.user._id && !owner && chat.isPrivate === false) {
-      //     owner = chat.users.find((user) => {
-      //       if (user._id.toString() !== ownerId.toString()) {
-      //         return user;
-      //       }
-      //     });
-      //   }
-      // })
       const newUsers = chat.users.filter((user) => {
         if (user._id.toString() !== req.user._id) {
           return user;

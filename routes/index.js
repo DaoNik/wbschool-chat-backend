@@ -1,5 +1,7 @@
 const router = require('express').Router();
 const { celebrate, Joi } = require('celebrate');
+const privateChatsRouter = require('./privateChats');
+const groupChatsRouter = require('./groupChats');
 const chatsRouter = require('./chats');
 const usersRouter = require('./users');
 const auth = require('../middleware/auth');
@@ -38,6 +40,8 @@ router.post(
 
 router.use(auth);
 
+router.use('/chats/privates', privateChatsRouter);
+router.use('/chats/groups', groupChatsRouter);
 router.use('/chats', chatsRouter);
 router.use('/users', usersRouter);
 

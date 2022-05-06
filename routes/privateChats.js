@@ -1,25 +1,20 @@
 const router = require("express").Router();
 const { celebrate, Joi } = require("celebrate");
 const {
-  getFriends,
-  getGroups,
+  getPrivateChats,
   createPrivateChat,
-  createChat,
-  deleteChat,
   updateChat,
   getUsersChat,
   getChats,
   getChat,
   exitChat,
   ownersChat,
-} = require("../controllers/chats");
+} = require("../controllers/privateChats");
 const messagesRouter = require("./messages");
 
-router.get("/", getChats);
+// router.get("/", getChats);
 
-router.get("/friends", getFriends);
-
-router.get("/groups", getGroups);
+router.get("/", getPrivateChats);
 
 router.get(
   "/:id",
@@ -58,10 +53,6 @@ router.post(
       ownerUsername: Joi.string().required(),
       ownerAvatar: Joi.string().required().base64(),
       ownerFormatImage: Joi.string(),
-      name: Joi.string().min(4).max(40),
-      formatImage: Joi.string().min(10).max(50),
-      avatar: Joi.string().base64(),
-      about: Joi.string().min(4).max(100),
       isNotifications: Joi.boolean(),
       isRead: Joi.boolean(),
       isActive: Joi.boolean(),
@@ -71,33 +62,6 @@ router.post(
   createPrivateChat
 );
 
-router.post(
-  "/",
-  celebrate({
-    body: Joi.object().keys({
-      name: Joi.string().required().min(4).max(40),
-      formatImage: Joi.string().min(10).max(50),
-      avatar: Joi.string().base64(),
-      about: Joi.string().min(4).max(100),
-      isNotifications: Joi.boolean(),
-      isRead: Joi.boolean(),
-      isActive: Joi.boolean(),
-      users: Joi.array().required(),
-    }),
-  }),
-  createChat
-);
-
-router.delete(
-  "/:id",
-  celebrate({
-    params: Joi.object().keys({
-      id: Joi.string().length(24).hex(),
-    }),
-  }),
-  deleteChat
-);
-
 router.patch(
   "/:id",
   celebrate({
@@ -105,10 +69,6 @@ router.patch(
       id: Joi.string().length(24).hex(),
     }),
     body: Joi.object().keys({
-      name: Joi.string().min(4).max(40),
-      formatImage: Joi.string().min(10).max(50),
-      avatar: Joi.string().base64(),
-      about: Joi.string().min(4).max(100),
       isNotifications: Joi.boolean(),
       isRead: Joi.boolean(),
       isActive: Joi.boolean(),

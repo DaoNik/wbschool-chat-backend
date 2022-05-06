@@ -1,25 +1,20 @@
 const router = require("express").Router();
 const { celebrate, Joi } = require("celebrate");
 const {
-  getFriends,
   getGroups,
-  createPrivateChat,
-  createChat,
+  createGroupChat,
   deleteChat,
   updateChat,
   getUsersChat,
   getChats,
   getChat,
   exitChat,
-  ownersChat,
-} = require("../controllers/chats");
+} = require("../controllers/groupChats");
 const messagesRouter = require("./messages");
 
-router.get("/", getChats);
+// router.get("/", getChats);
 
-router.get("/friends", getFriends);
-
-router.get("/groups", getGroups);
+router.get("/", getGroups);
 
 router.get(
   "/:id",
@@ -42,36 +37,6 @@ router.get(
 );
 
 router.post(
-  "/owners",
-  celebrate({
-    body: Joi.object().keys({
-      userId: Joi.string().length(24).hex(),
-    }),
-  }),
-  ownersChat
-);
-
-router.post(
-  "/private",
-  celebrate({
-    body: Joi.object().keys({
-      ownerUsername: Joi.string().required(),
-      ownerAvatar: Joi.string().required().base64(),
-      ownerFormatImage: Joi.string(),
-      name: Joi.string().min(4).max(40),
-      formatImage: Joi.string().min(10).max(50),
-      avatar: Joi.string().base64(),
-      about: Joi.string().min(4).max(100),
-      isNotifications: Joi.boolean(),
-      isRead: Joi.boolean(),
-      isActive: Joi.boolean(),
-      users: Joi.array(),
-    }),
-  }),
-  createPrivateChat
-);
-
-router.post(
   "/",
   celebrate({
     body: Joi.object().keys({
@@ -81,11 +46,10 @@ router.post(
       about: Joi.string().min(4).max(100),
       isNotifications: Joi.boolean(),
       isRead: Joi.boolean(),
-      isActive: Joi.boolean(),
       users: Joi.array().required(),
     }),
   }),
-  createChat
+  createGroupChat
 );
 
 router.delete(
@@ -111,7 +75,6 @@ router.patch(
       about: Joi.string().min(4).max(100),
       isNotifications: Joi.boolean(),
       isRead: Joi.boolean(),
-      isActive: Joi.boolean(),
       users: Joi.array(),
     }),
   }),

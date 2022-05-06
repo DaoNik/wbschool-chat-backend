@@ -1,7 +1,7 @@
 const { Schema, model, Types } = require("mongoose");
 const validator = require("validator");
 
-const chatSchema = new Schema(
+const groupChatSchema = new Schema(
   {
     name: {
       type: String,
@@ -34,10 +34,6 @@ const chatSchema = new Schema(
       type: Boolean,
       default: false,
     },
-    isActive: {
-      type: Boolean,
-      default: false,
-    },
     users: {
       type: [Types.ObjectId],
       required: true,
@@ -49,22 +45,13 @@ const chatSchema = new Schema(
       required: true,
       default: [],
     },
-    avatars: {
-      type: [],
-      default: [],
-    },
-    owner: {
+    owners: {
       type: [Types.ObjectId],
       ref: "user",
       required: true,
     },
-    isPrivate: {
-      type: Boolean,
-      default: false,
-      required: true
-    }
   },
   { versionKey: false }
 );
 
-module.exports = model("chat", chatSchema);
+module.exports = model("groupChat", groupChatSchema);

@@ -87,7 +87,7 @@ const createGroupChat = (req, res, next) => {
   GroupChat.create({
     ...req.body,
     users: [req.user._id, ...req.body.users],
-    owner: [req.user._id]
+    owners: [req.user._id]
   })
     .then((chat) => {
       res.send(chat);

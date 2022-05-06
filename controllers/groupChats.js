@@ -48,7 +48,7 @@ const getChats = (req, res, next) => {
     .catch(next);
 };
 
-async function fetchChats(socket) {
+async function fetchGroupChats(socket) {
   const chats = await GroupChat.find({})
     .where("users")
     .equals(socket.data.payload._id);
@@ -228,6 +228,6 @@ module.exports = {
   deleteChat,
   updateChat,
   getUsersChat,
-  fetchChats,
+  fetchGroupChats,
   exitChat,
 };

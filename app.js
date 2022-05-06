@@ -12,7 +12,8 @@ const handleAllowedCors = require("./middleware/handleAllowedCors");
 const handleErrors = require("./middleware/handleErrors");
 const { Server } = require("socket.io");
 const NotFoundError = require("./errors/NotFoundError");
-const { fetchChats } = require("./controllers/chats");
+const { fetchPrivateChats } = require("./controllers/privateChats");
+const { fetchGroupChats } = require("./controllers/groupChats");
 const {
   deleteMessage,
   createMessage,
@@ -93,8 +94,11 @@ io.on("connection", async (socket) => {
     console.log(`Client with id ${socket.id} disconnected`);
   });
 
-  const chats = await fetchChats(socket);
-  chats.forEach((chat) => socket.join(chat._id.toString()));
+  const privateChats = await fetchPrivateChats(socket);
+  privateChats.forEach((chat) => socket.join(chat._id.toString()));
+
+  const groupChats = await fetchGroupChats(socket);
+  groupChats.forEach((chat) => socket.join(chat._id.toString()));
 
   socket.on("messages:delete", deleteMessage);
   socket.on("messages:create", createMessage);

@@ -48,7 +48,7 @@ const getChats = (req, res, next) => {
     .catch(next);
 };
 
-async function fetchChats(socket) {
+async function fetchPrivateChats(socket) {
   const chats = await PrivateChat.find({})
     .where("users")
     .equals(socket.data.payload._id);
@@ -72,12 +72,6 @@ const getPrivateChats = (req, res, next) => {
     .where("users")
     .equals(req.user._id)
     .then((chats) => {
-      // const newArr = [];
-      // chats.map((chat) => {
-      //   if (chat.isPrivate === true) {
-      //     newArr.push(chat);
-      //   }
-      // });
       res.send(chats);
     })
     .catch(next);
@@ -228,7 +222,7 @@ module.exports = {
   createPrivateChat,
   updateChat,
   getUsersChat,
-  fetchChats,
+  fetchPrivateChats,
   exitChat,
   ownersChat,
 };

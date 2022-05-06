@@ -24,7 +24,6 @@ const getUsersChat = (req, res, next) => {
             delete newUser.userRights;
             delete newUser.email;
             delete newUser.about;
-            delete newUser.__v;
             usersChat.push(newUser);
           });
           res.send(usersChat);
@@ -38,24 +37,14 @@ const getUsersChat = (req, res, next) => {
     });
 };
 
-const getChats = (req, res, next) => {
-  PrivateChat.find({})
-    .where("users")
-    .equals(req.user._id)
-    .then((chats) => {
-      res.send(chats);
-    })
-    .catch(next);
-};
-
-async function fetchPrivateChats(socket) {
+async function fetchPrivates(socket) {
   const chats = await PrivateChat.find({})
     .where("users")
     .equals(socket.data.payload._id);
   return chats;
 }
 
-const getChat = (req, res, next) => {
+const getPrivateChat = (req, res, next) => {
   const { id } = req.params;
   PrivateChat.findById(id)
     .then((chat) => {
@@ -120,23 +109,18 @@ const createPrivateChat = (req, res, next) => {
 
 const ownersChat = (req, res, next) => {
   const { userId } = req.body;
-  PrivateChat.find({})
+  PrivateChat.findOne({})
     .where("owners")
-    .equals([req.user._id, userId] || [userId, req.user._id])
+    .all([userId, req.user._id] || [req.user._id, userId])
     .then((chats) => {
       res.send(chats);
     })
     .catch(next);
-}
+};
 
 const updateChat = (req, res, next) => {
   const { id } = req.params;
-  const {
-    users,
-    isNotifications,
-    isRead,
-    isActive,
-  } = req.body;
+  const { users, isNotifications, isRead, isActive } = req.body;
 
   return PrivateChat.findById(id)
     .then((chat) => {
@@ -146,7 +130,7 @@ const updateChat = (req, res, next) => {
       return chat;
     })
     .then(() =>
-    PrivateChat.findByIdAndUpdate(
+      PrivateChat.findByIdAndUpdate(
         id,
         {
           users,
@@ -216,13 +200,12 @@ const exitChat = (req, res, next) => {
 };
 
 module.exports = {
-  getChats,
-  getChat,
+  getPrivateChat,
   getPrivateChats,
   createPrivateChat,
   updateChat,
   getUsersChat,
-  fetchPrivateChats,
+  fetchPrivates,
   exitChat,
   ownersChat,
 };

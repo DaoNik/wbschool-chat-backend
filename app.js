@@ -12,8 +12,8 @@ const handleAllowedCors = require("./middleware/handleAllowedCors");
 const handleErrors = require("./middleware/handleErrors");
 const { Server } = require("socket.io");
 const NotFoundError = require("./errors/NotFoundError");
-const { fetchPrivateChats } = require("./controllers/privateChats");
-const { fetchGroupChats } = require("./controllers/groupChats");
+const { fetchGroups } = require("./controllers/groupChats");
+const { fetchPrivates } = require("./controllers/privateChats");
 const {
   deleteMessage,
   createMessage,
@@ -94,11 +94,10 @@ io.on("connection", async (socket) => {
     console.log(`Client with id ${socket.id} disconnected`);
   });
 
-  const privateChats = await fetchPrivateChats(socket);
-  privateChats.forEach((chat) => socket.join(chat._id.toString()));
-
-  const groupChats = await fetchGroupChats(socket);
-  groupChats.forEach((chat) => socket.join(chat._id.toString()));
+  const groups = await fetchGroups(socket);
+  groups.forEach((groups) => socket.join(groups._id.toString()));
+  const privates = await fetchPrivates(socket);
+  privates.forEach((private) => socket.join(private._id.toString()));
 
   socket.on("messages:delete", deleteMessage);
   socket.on("messages:create", createMessage);
@@ -141,7 +140,6 @@ io.on("connection", async (socket) => {
 app.use("/api", router);
 
 app.get("/api/clients-count", (req, res) => {
-  console.log("Count", io.engine.clientsCount);
   res.send({
     count: io.engine.clientsCount,
   });

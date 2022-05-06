@@ -24,7 +24,6 @@ const getUsersChat = (req, res, next) => {
             delete newUser.userRights;
             delete newUser.email;
             delete newUser.about;
-            delete newUser.__v;
             usersChat.push(newUser);
           });
           res.send(usersChat);
@@ -38,24 +37,14 @@ const getUsersChat = (req, res, next) => {
     });
 };
 
-const getChats = (req, res, next) => {
-  GroupChat.find({})
-    .where("users")
-    .equals(req.user._id)
-    .then((chats) => {
-      res.send(chats);
-    })
-    .catch(next);
-};
-
-async function fetchGroupChats(socket) {
-  const chats = await GroupChat.find({})
+async function fetchGroups(socket) {
+  const groups = await GroupChat.find({})
     .where("users")
     .equals(socket.data.payload._id);
-  return chats;
+  return groups;
 }
 
-const getChat = (req, res, next) => {
+const getGroupChat = (req, res, next) => {
   const { id } = req.params;
   GroupChat.findById(id)
     .then((chat) => {
@@ -72,12 +61,6 @@ const getGroups = (req, res, next) => {
     .where("users")
     .equals(req.user._id)
     .then((chats) => {
-      // const newArr = [];
-      // chats.map((chat) => {
-      //   if (chat.isPrivate === false) {
-      //     newArr.push(chat);
-      //   }
-      // });
       res.send(chats);
     })
     .catch(next);
@@ -87,7 +70,7 @@ const createGroupChat = (req, res, next) => {
   GroupChat.create({
     ...req.body,
     users: [req.user._id, ...req.body.users],
-    owners: [req.user._id]
+    owners: [req.user._id],
   })
     .then((chat) => {
       res.send(chat);
@@ -107,11 +90,11 @@ const deleteChat = (req, res, next) => {
       if (!chat) {
         throw new NotFoundError("Нет чата с таким id");
       }
-      chat.owners.forEach(owner => {
+      chat.owners.forEach((owner) => {
         if (owner.toString() !== req.user._id) {
           throw new AllowsError("Вы не можете удалить этот чат");
         }
-      })
+      });
       return chat;
     })
     .then(() => GroupChat.findByIdAndDelete(id).then(() => res.send({ id })))
@@ -125,30 +108,23 @@ const deleteChat = (req, res, next) => {
 
 const updateChat = (req, res, next) => {
   const { id } = req.params;
-  const {
-    name,
-    avatar,
-    formatImage,
-    about,
-    users,
-    isNotifications,
-    isRead,
-  } = req.body;
+  const { name, avatar, formatImage, about, users, isNotifications, isRead } =
+    req.body;
 
   return GroupChat.findById(id)
     .then((chat) => {
       if (!chat) {
         throw new NotFoundError("Нет чата с таким id");
       }
-      chat.owners.forEach(owner => {
+      chat.owners.forEach((owner) => {
         if (owner.toString() !== req.user._id) {
           throw new AllowsError("Вы не можете изменить этот чат");
         }
-      })
+      });
       return chat;
     })
     .then(() =>
-    GroupChat.findByIdAndUpdate(
+      GroupChat.findByIdAndUpdate(
         id,
         {
           name,
@@ -185,7 +161,7 @@ const exitChat = (req, res, next) => {
       if (!chat) {
         throw new NotFoundError("Нет чата с таким id");
       }
-      chat.owners.forEach(ownerId => {
+      chat.owners.forEach((ownerId) => {
         if (ownerId.toString() === req.user._id && !owner) {
           owner = chat.users.find((user) => {
             if (user._id.toString() !== ownerId.toString()) {
@@ -193,7 +169,7 @@ const exitChat = (req, res, next) => {
             }
           });
         }
-      })
+      });
       const newUsers = chat.users.filter((user) => {
         if (user._id.toString() !== req.user._id) {
           return user;
@@ -221,13 +197,12 @@ const exitChat = (req, res, next) => {
 };
 
 module.exports = {
-  getChats,
-  getChat,
+  getGroupChat,
   getGroups,
   createGroupChat,
   deleteChat,
   updateChat,
   getUsersChat,
-  fetchGroupChats,
+  fetchGroups,
   exitChat,
 };

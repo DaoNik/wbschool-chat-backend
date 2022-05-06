@@ -14,7 +14,7 @@ const getMessages = (req, res, next) => {
     .catch(next);
 };
 
-async function createMessage({ chatId, message }) {
+async function createMessage({ chatId, message, isPrivate }) {
   try {
     const socket = this;
     const currentUser = await User.findById(socket.data.payload._id);
@@ -25,11 +25,16 @@ async function createMessage({ chatId, message }) {
       expiresIn: Date.now(),
       owner: currentUser._id,
     });
-    const newThread = await Thread.create({ owner: currentMessage._id });
-    console.log("thread", newThread);
-    console.log("message", currentMessage);
     socket.emit(`messages:create`, currentMessage);
     socket.to(chatId).emit(`messages:create`, currentMessage);
+    if (!isPrivate) {
+      const newThread = await Thread.create({
+        owner: currentMessage._id,
+        avatar: currentUser.avatar,
+        formatImage: currentUser.formatImage,
+      });
+      console.log("Thread создан", newThread);
+    }
   } catch (err) {
     console.log(err);
   }

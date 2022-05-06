@@ -1,14 +1,14 @@
-const Chat = require("../models/Chat");
+const PrivateChat = require("../models/PrivateChat");
 const User = require("../models/User");
 const ValidationError = require("../errors/ValidationError");
 const AllowsError = require("../errors/AllowsError");
 const NotFoundError = require("../errors/NotFoundError");
 const ConflictError = require("../errors/ConflictError");
 
-// Нахрен не надо
+//нахрен не надо
 const getUsersChat = (req, res, next) => {
   const { id } = req.params;
-  Chat.findById(id)
+  PrivateChat.findById(id)
     .then((chat) => {
       if (!chat) {
         throw new NotFoundError("Нет чата с таким id");
@@ -17,13 +17,13 @@ const getUsersChat = (req, res, next) => {
         .where("_id")
         .in(chat.users)
         .then((users) => {
+          console.log(users);
           const usersChat = [];
           users.map((user) => {
             const newUser = user.toObject();
             delete newUser.userRights;
             delete newUser.email;
             delete newUser.about;
-            delete newUser.__v;
             usersChat.push(newUser);
           });
           res.send(usersChat);
@@ -37,26 +37,16 @@ const getUsersChat = (req, res, next) => {
     });
 };
 
-const getChats = (req, res, next) => {
-  Chat.find({})
-    .where("users")
-    .equals(req.user._id)
-    .then((chats) => {
-      res.send(chats);
-    })
-    .catch(next);
-};
-
-async function fetchChats(socket) {
-  const chats = await Chat.find({})
+async function fetchPrivates(socket) {
+  const chats = await PrivateChat.find({})
     .where("users")
     .equals(socket.data.payload._id);
   return chats;
 }
 
-const getChat = (req, res, next) => {
+const getPrivateChat = (req, res, next) => {
   const { id } = req.params;
-  Chat.findById(id)
+  PrivateChat.findById(id)
     .then((chat) => {
       if (!chat) {
         throw new NotFoundError("Нет чата с таким id");
@@ -66,34 +56,12 @@ const getChat = (req, res, next) => {
     .catch(next);
 };
 
-const getFriends = (req, res, next) => {
-  Chat.find({})
+const getPrivateChats = (req, res, next) => {
+  PrivateChat.find({})
     .where("users")
     .equals(req.user._id)
     .then((chats) => {
-      const newArr = [];
-      chats.map((chat) => {
-        if (chat.users.length <= 2) {
-          newArr.push(chat);
-        }
-      });
-      res.send(newArr);
-    })
-    .catch(next);
-};
-
-const getGroups = (req, res, next) => {
-  Chat.find({})
-    .where("users")
-    .equals(req.user._id)
-    .then((chats) => {
-      const newArr = [];
-      chats.map((chat) => {
-        if (chat.users.length > 2) {
-          newArr.push(chat);
-        }
-      });
-      res.send(newArr);
+      res.send(chats);
     })
     .catch(next);
 };
@@ -102,7 +70,6 @@ const createPrivateChat = (req, res, next) => {
   const { username } = req.query;
   const { ownerUsername, ownerAvatar, ownerFormatImage } = req.body;
 
-  const about = `Личный чат с пользователем ${username}`;
   if (username) {
     User.findOne({ username })
       .then((user) => {
@@ -112,18 +79,14 @@ const createPrivateChat = (req, res, next) => {
         return user;
       })
       .then((user) => {
-        Chat.create({
-          name: user.username,
-          about: about,
-          avatar: user.avatar,
-          formatImage: user.formatImage,
+        PrivateChat.create({
           users: [user._id, req.user._id],
           usernames: [user.username, ownerUsername],
           avatars: [
             { ownerAvatar, ownerFormatImage },
             { avatar: user.avatar, formatImage: user.formatImage },
           ],
-          owner: req.user._id,
+          owners: [user._id, req.user._id],
         })
           .then((chat) => {
             res.send(chat);
@@ -144,77 +107,32 @@ const createPrivateChat = (req, res, next) => {
   }
 };
 
-const createChat = (req, res, next) => {
-  Chat.create({
-    ...req.body,
-    users: [req.user._id, ...req.body.users],
-    owner: req.user._id,
-  })
-    .then((chat) => {
-      res.send(chat);
+const ownersChat = (req, res, next) => {
+  const { userId } = req.body;
+  PrivateChat.find({})
+    .where("owners")
+    .equals([req.user._id, userId] || [userId, req.user._id])
+    .then((chats) => {
+      res.send(chats);
     })
-    .catch((err) => {
-      if (err.name === "ValidationError") {
-        return next(new ValidationError("Неверно введены данные для чата"));
-      }
-      return next(err);
-    });
-};
-
-const deleteChat = (req, res, next) => {
-  const { id } = req.params;
-  return Chat.findById(id)
-    .then((chat) => {
-      if (!chat) {
-        throw new NotFoundError("Нет чата с таким id");
-      }
-      const chatOwnerId = chat.owner.toString();
-      if (chatOwnerId !== req.user._id) {
-        throw new AllowsError("Вы не можете удалить этот чат");
-      }
-      return chat;
-    })
-    .then(() => Chat.findByIdAndDelete(id).then(() => res.send({ id })))
-    .catch((err) => {
-      if (err.name === "CastError") {
-        return next(new ValidationError("Невалидный id чата"));
-      }
-      return next(err);
-    });
+    .catch(next);
 };
 
 const updateChat = (req, res, next) => {
   const { id } = req.params;
-  const {
-    name,
-    avatar,
-    formatImage,
-    about,
-    users,
-    isNotifications,
-    isRead,
-    isActive,
-  } = req.body;
+  const { users, isNotifications, isRead, isActive } = req.body;
 
-  return Chat.findById(id)
+  return PrivateChat.findById(id)
     .then((chat) => {
       if (!chat) {
         throw new NotFoundError("Нет чата с таким id");
       }
-      const chatOwnerId = chat.owner.toString();
-      if (chatOwnerId !== req.user._id) {
-        throw new AllowsError("Вы не можете изменить этот чат");
-      }
       return chat;
     })
     .then(() =>
-      Chat.findByIdAndUpdate(
+      PrivateChat.findByIdAndUpdate(
         id,
         {
-          name,
-          avatar,
-          formatImage,
-          about,
           users,
           isNotifications,
           isRead,
@@ -241,28 +159,29 @@ const exitChat = (req, res, next) => {
   const { id } = req.params;
   let { owner } = req.body;
 
-  return Chat.findById(id)
+  return PrivateChat.findById(id)
     .then((chat) => {
       if (!chat) {
         throw new NotFoundError("Нет чата с таким id");
       }
-      const chatOwnerId = chat.owner.toString();
-      if (chatOwnerId === req.user._id && !owner) {
-        owner = chat.users.find((user) => {
-          if (user._id.toString() !== chatOwnerId) {
-            return user;
-          }
-        });
-      }
+      // chat.owner.forEach(ownerId => {
+      //   if (ownerId.toString() === req.user._id && !owner && chat.isPrivate === false) {
+      //     owner = chat.users.find((user) => {
+      //       if (user._id.toString() !== ownerId.toString()) {
+      //         return user;
+      //       }
+      //     });
+      //   }
+      // })
       const newUsers = chat.users.filter((user) => {
         if (user._id.toString() !== req.user._id) {
           return user;
         }
       });
       if (newUsers.length <= 0) {
-        return Chat.findByIdAndDelete(id).then(() => res.send({ id }));
+        return PrivateChat.findByIdAndDelete(id).then(() => res.send({ id }));
       } else {
-        Chat.findByIdAndUpdate(
+        PrivateChat.findByIdAndUpdate(
           id,
           { owner, users: newUsers },
           { new: true, runValidators: true }
@@ -281,15 +200,12 @@ const exitChat = (req, res, next) => {
 };
 
 module.exports = {
-  getChats,
-  getChat,
-  getFriends,
-  getGroups,
+  getPrivateChat,
+  getPrivateChats,
   createPrivateChat,
-  createChat,
-  deleteChat,
   updateChat,
   getUsersChat,
-  fetchChats,
+  fetchPrivates,
   exitChat,
+  ownersChat,
 };

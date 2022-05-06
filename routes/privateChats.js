@@ -5,14 +5,11 @@ const {
   createPrivateChat,
   updateChat,
   getUsersChat,
-  getChats,
-  getChat,
+  getPrivateChat,
   exitChat,
   ownersChat,
 } = require("../controllers/privateChats");
 const messagesRouter = require("./messages");
-
-// router.get("/", getChats);
 
 router.get("/", getPrivateChats);
 
@@ -23,7 +20,7 @@ router.get(
       id: Joi.string().length(24).hex(),
     }),
   }),
-  getChat
+  getPrivateChat
 );
 
 router.get(
@@ -47,7 +44,7 @@ router.post(
 );
 
 router.post(
-  "/private",
+  "/",
   celebrate({
     body: Joi.object().keys({
       ownerUsername: Joi.string().required(),

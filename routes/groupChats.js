@@ -6,13 +6,10 @@ const {
   deleteChat,
   updateChat,
   getUsersChat,
-  getChats,
-  getChat,
+  getGroupChat,
   exitChat,
 } = require("../controllers/groupChats");
 const messagesRouter = require("./messages");
-
-// router.get("/", getChats);
 
 router.get("/", getGroups);
 
@@ -23,7 +20,7 @@ router.get(
       id: Joi.string().length(24).hex(),
     }),
   }),
-  getChat
+  getGroupChat
 );
 
 router.get(

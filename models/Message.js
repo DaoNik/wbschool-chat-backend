@@ -20,6 +20,12 @@ const messageSchema = new Schema(
       minLength: 10,
       maxLength: 50,
     },
+    // voice: {
+    //   type: Blob,
+    //   validate: {
+    //     validator:(value) => validator.isBlob(value),
+    //   },
+    // },
     expiresIn: {
       type: Date,
       validate: {

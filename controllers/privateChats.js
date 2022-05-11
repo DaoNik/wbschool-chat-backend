@@ -1,7 +1,6 @@
 const PrivateChat = require("../models/PrivateChat");
 const User = require("../models/User");
 const ValidationError = require("../errors/ValidationError");
-const AllowsError = require("../errors/AllowsError");
 const NotFoundError = require("../errors/NotFoundError");
 const ConflictError = require("../errors/ConflictError");
 
@@ -17,7 +16,6 @@ const getUsersChat = (req, res, next) => {
         .where("_id")
         .in(chat.users)
         .then((users) => {
-          console.log(users);
           const usersChat = [];
           users.map((user) => {
             const newUser = user.toObject();
@@ -30,9 +28,6 @@ const getUsersChat = (req, res, next) => {
         });
     })
     .catch((err) => {
-      if (err.name === "MongoServerError" && err.code === 11000) {
-        return next(ConflictError("Это имя чата уже занято"));
-      }
       return next(err);
     });
 };
@@ -69,42 +64,39 @@ const getPrivateChats = (req, res, next) => {
 const createPrivateChat = (req, res, next) => {
   const { username } = req.query;
   const { ownerUsername, ownerAvatar, ownerFormatImage } = req.body;
-
-  if (username) {
-    User.findOne({ username })
-      .then((user) => {
-        if (!user) {
-          throw new NotFoundError("Нет такого пользователя");
-        }
-        return user;
-      })
-      .then((user) => {
-        PrivateChat.create({
-          users: [user._id, req.user._id],
-          usernames: [user.username, ownerUsername],
-          avatars: [
-            { ownerAvatar, ownerFormatImage },
-            { avatar: user.avatar, formatImage: user.formatImage },
-          ],
-          owners: [user._id, req.user._id],
-        })
-          .then((chat) => {
-            res.send(chat);
-          })
-          .catch((err) => {
-            if (err.name === "ValidationError") {
-              return next(
-                new ValidationError("Неверно введены данные для чата")
-              );
-            }
-            if (err.name === "MongoServerError" && err.code === 11000) {
-              return next(new ConflictError("Данный чат уже существует"));
-            }
-            return next(err);
-          });
-      })
-      .catch(next);
+  if (!username) {
+    throw new NotFoundError("Вы не передали пользователя!")
   }
+  User.findOne({ username })
+    .then((user) => {
+      if (!user) {
+        throw new NotFoundError("Нет такого пользователя");
+      }
+      return user;
+    })
+    .then((user) => {
+      PrivateChat.create({
+        users: [user._id, req.user._id],
+        usernames: [user.username, ownerUsername],
+        avatars: [
+          { ownerAvatar, ownerFormatImage },
+          { avatar: user.avatar, formatImage: user.formatImage },
+        ],
+        owners: [user._id, req.user._id],
+      })
+        .then((chat) => {
+          res.send(chat);
+        })
+        .catch((err) => {
+          if (err.name === "ValidationError") {
+            return next(
+              new ValidationError("Неверно введены данные для чата")
+            );
+          }
+          return next(err);
+        });
+    })
+    .catch(next);
 };
 
 const ownersChat = (req, res, next) => {
@@ -157,7 +149,6 @@ const updateChat = (req, res, next) => {
 
 const exitChat = (req, res, next) => {
   const { id } = req.params;
-  let { owner } = req.body;
 
   return PrivateChat.findById(id)
     .then((chat) => {
@@ -174,7 +165,7 @@ const exitChat = (req, res, next) => {
       } else {
         PrivateChat.findByIdAndUpdate(
           id,
-          { owner, users: newUsers },
+          { users: newUsers },
           { new: true, runValidators: true }
         ).then((chat) => res.send({ chat }));
       }

@@ -26,12 +26,11 @@ async function createMessage({ chatId, message, isPrivate }) {
     socket.emit(`messages:create`, currentMessage);
     socket.to(chatId).emit(`messages:create`, currentMessage);
     if (!isPrivate) {
-      const newThread = await Thread.create({
+      await Thread.create({
         owner: currentMessage._id,
         avatar: currentUser.avatar,
         formatImage: currentUser.formatImage,
       });
-      console.log("Thread создан", newThread);
     }
   } catch (err) {
     console.log(err);

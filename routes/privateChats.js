@@ -81,9 +81,6 @@ router.patch(
     params: Joi.object().keys({
       id: Joi.string().length(24).hex(),
     }),
-    body: Joi.object().keys({
-      owner: Joi.string().length(24).hex(),
-    }),
   }),
   exitChat
 );

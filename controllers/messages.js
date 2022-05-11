@@ -7,7 +7,11 @@ const Thread = require("../models/Thread");
 
 const getMessages = (req, res, next) => {
   const { chatId } = req.params;
+  // const {index} = req.query;
   Message.find({ chatId })
+    // .sort({ expiresIn: -1 })
+    // .skip(index)
+    // .limit(20)
     .then((messages) => {
       res.send(messages);
     })
@@ -44,7 +48,7 @@ function updateMessage({ chatId, message }) {
   try {
     const socket = this;
     const { text, imageOrFile, formatImage, _id: id } = message;
-    const expiresIn = Date.now();
+    // const expiresIn = Date.now();
 
     return Message.findById(id)
       .then((message) => {

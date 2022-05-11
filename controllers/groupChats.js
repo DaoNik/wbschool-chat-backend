@@ -3,7 +3,6 @@ const User = require("../models/User");
 const ValidationError = require("../errors/ValidationError");
 const AllowsError = require("../errors/AllowsError");
 const NotFoundError = require("../errors/NotFoundError");
-const ConflictError = require("../errors/ConflictError");
 
 // Нахрен не надо
 const getUsersChat = (req, res, next) => {
@@ -17,7 +16,6 @@ const getUsersChat = (req, res, next) => {
         .where("_id")
         .in(chat.users)
         .then((users) => {
-          console.log(users);
           const usersChat = [];
           users.map((user) => {
             const newUser = user.toObject();
@@ -30,9 +28,6 @@ const getUsersChat = (req, res, next) => {
         });
     })
     .catch((err) => {
-      if (err.name === "MongoServerError" && err.code === 11000) {
-        return next(ConflictError("Это имя чата уже занято"));
-      }
       return next(err);
     });
 };
@@ -90,12 +85,16 @@ const deleteChat = (req, res, next) => {
       if (!chat) {
         throw new NotFoundError("Нет чата с таким id");
       }
-      chat.owners.forEach((owner) => {
-        if (owner.toString() !== req.user._id) {
-          throw new AllowsError("Вы не можете удалить этот чат");
+      const result = chat.owners.find((owner) => {
+        if (owner.toString() === req.user._id) {
+          return owner;
         }
       });
-      return chat;
+      if (result) {
+        return chat;
+      } else {
+        throw new AllowsError("Вы не можете удалить этот чат");
+      }
     })
     .then(() => GroupChat.findByIdAndDelete(id).then(() => res.send({ id })))
     .catch((err) => {
@@ -116,12 +115,16 @@ const updateChat = (req, res, next) => {
       if (!chat) {
         throw new NotFoundError("Нет чата с таким id");
       }
-      chat.owners.forEach((owner) => {
-        if (owner.toString() !== req.user._id) {
-          throw new AllowsError("Вы не можете изменить этот чат");
+      const result = chat.owners.find((owner) => {
+        if (owner.toString() === req.user._id) {
+          return owner;
         }
       });
-      return chat;
+      if (result) {
+        return chat;
+      } else {
+        throw new AllowsError("Вы не можете удалить этот чат");
+      }
     })
     .then(() =>
       GroupChat.findByIdAndUpdate(
@@ -155,21 +158,15 @@ const updateChat = (req, res, next) => {
 const exitChat = (req, res, next) => {
   const { id } = req.params;
   let { owner } = req.body;
-
+  owner = [owner];
   return GroupChat.findById(id)
     .then((chat) => {
       if (!chat) {
         throw new NotFoundError("Нет чата с таким id");
       }
-      chat.owners.forEach((ownerId) => {
-        if (ownerId.toString() === req.user._id && !owner) {
-          owner = chat.users.find((user) => {
-            if (user._id.toString() !== ownerId.toString()) {
-              return user;
-            }
-          });
-        }
-      });
+      if(!owner){
+        owner = chat.owners;
+      }
       const newUsers = chat.users.filter((user) => {
         if (user._id.toString() !== req.user._id) {
           return user;
@@ -180,7 +177,7 @@ const exitChat = (req, res, next) => {
       } else {
         GroupChat.findByIdAndUpdate(
           id,
-          { owner, users: newUsers },
+          { owners: owner, users: newUsers },
           { new: true, runValidators: true }
         ).then((chat) => res.send({ chat }));
       }

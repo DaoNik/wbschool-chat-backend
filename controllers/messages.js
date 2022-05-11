@@ -1,8 +1,6 @@
 const Message = require("../models/Message");
 const User = require("../models/User");
 const NotFoundError = require("../errors/NotFoundError");
-const AllowsError = require("../errors/AllowsError");
-const ValidationError = require("../errors/ValidationError");
 const Thread = require("../models/Thread");
 
 const getMessages = (req, res, next) => {
@@ -32,12 +30,11 @@ async function createMessage({ chatId, message, isPrivate }) {
     socket.emit(`messages:create`, currentMessage);
     socket.to(chatId).emit(`messages:create`, currentMessage);
     if (!isPrivate) {
-      const newThread = await Thread.create({
+      await Thread.create({
         owner: currentMessage._id,
         avatar: currentUser.avatar,
         formatImage: currentUser.formatImage,
       });
-      console.log("Thread создан", newThread);
     }
   } catch (err) {
     console.log(err);
@@ -48,23 +45,23 @@ function updateMessage({ chatId, message }) {
   try {
     const socket = this;
     const { text, imageOrFile, formatImage, _id: id } = message;
-    // const expiresIn = Date.now();
 
     return Message.findById(id)
       .then((message) => {
         // if (!message) {
         //   throw new NotFoundError('Нет сообщения с таким id')
         // }
-        // const messageOwnerId = message.owner.toString();
-        // if (messageOwnerId !== socket.data.payload._id) {
-        //   throw new AllowsError('Вы не можете изменить это сообщение')
-        // }
-        return message;
+        if (message.owner.toString() === socket.data.payload._id.toString()) {
+          return message;
+        } else {
+          // throw new AllowsError('Вы не можете изменить это сообщение');
+          console.log("У вас нет прав, вы НИКТО!");
+        }
       })
       .then(() =>
         Message.findByIdAndUpdate(
           id,
-          { text, imageOrFile, expiresIn, formatImage },
+          { text, imageOrFile, formatImage },
           { new: true, runValidators: true }
         )
       )
@@ -84,9 +81,14 @@ async function deleteMessage({ chatId, messageId }) {
     if (!message) {
       throw new NotFoundError("Нет сообщения с таким id");
     }
-    await Message.findByIdAndDelete(messageId);
-    socket.emit(`messages:delete`, { messageId, chatId });
-    socket.to(chatId).emit(`messages:delete`, { messageId, chatId });
+    if (message.owner.toString() === socket.data.payload._id.toString()) {
+      await Message.findByIdAndDelete(messageId);
+      socket.emit(`messages:delete`, { messageId, chatId });
+      socket.to(chatId).emit(`messages:delete`, { messageId, chatId });
+    } else {
+      // throw new AllowsError('Вы не можете удалить это сообщение');
+      console.log("У вас нет прав, вы НИКТО!");
+    }
   } catch (err) {
     console.error(err);
   }
@@ -94,16 +96,6 @@ async function deleteMessage({ chatId, messageId }) {
   //       if (!message) {
   //         throw new NotFoundError('Нет сообщения с таким id')
   //       }
-  //       const messageOwnerId = message.owner.toString();
-  //       if (messageOwnerId !== req.user._id) {
-  //         throw new AllowsError('Вы не можете удалить это сообщение')
-  //       }
-  //       return message;
-  //     })
-  //     .then(() => Message.findByIdAndDelete(id))
-  //     .then((message) => {
-  //       console.log('Мы туут)')
-  //       socket.emit('messages:delete', message._id);
   //     })
   //     .catch((err) => {
   //       if (err.name === 'CastError') {

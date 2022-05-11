@@ -46,7 +46,7 @@ function updateMessage({ chatId, message }) {
         // if (!message) {
         //   throw new NotFoundError('Нет сообщения с таким id')
         // }
-        if (message.owner === socket.data.payload._id) {
+        if (message.owner.toString() === socket.data.payload._id.toString()) {
           return message;
         } else {
           // throw new AllowsError('Вы не можете изменить это сообщение');
@@ -76,7 +76,7 @@ async function deleteMessage({ chatId, messageId }) {
     if (!message) {
       throw new NotFoundError("Нет сообщения с таким id");
     }
-    if (message.owner === socket.data.payload._id) {
+    if (message.owner.toString() === socket.data.payload._id.toString()) {
       await Message.findByIdAndDelete(messageId);
       socket.emit(`messages:delete`, { messageId, chatId });
       socket.to(chatId).emit(`messages:delete`, { messageId, chatId });

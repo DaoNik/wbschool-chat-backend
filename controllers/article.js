@@ -2,7 +2,7 @@ const Article = require('../models/Article');
 const NotFoundError = require("../errors/NotFoundError");
 const ValidationError = require('../errors/ValidationError')
 const getArticles = (req, res, next) => {
-  Article.find({})
+  Article.find({...req.query})
     .then((articles) => {
       if (!articles) {
         throw new NotFoundError("Нет статей! Кажется, мы снова снесли базу данных");

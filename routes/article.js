@@ -16,7 +16,7 @@ router.post('/',
   celebrate({
     body: Joi.object().keys({
       title: Joi.string().required().min(4).max(100),
-      description: Joi.string().required().min(10).max(100),
+      description: Joi.string().required().min(10).max(200),
       content: Joi.string().required().min(10),
       authors: Joi.array(),
       respondents: Joi.array(),
@@ -34,7 +34,7 @@ router.patch('/:id',
     }),
     body: Joi.object().keys({
       title: Joi.string().required().min(4).max(100),
-      description: Joi.string().required().min(10).max(100),
+      description: Joi.string().required().min(10).max(200),
       content: Joi.string().required().min(10),
       authors: Joi.array(),
       respondents: Joi.array(),

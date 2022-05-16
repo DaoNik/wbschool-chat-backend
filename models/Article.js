@@ -6,14 +6,14 @@ const articleSchema = new Schema(
     title: {
       type: String,
       required: true,
-      maxLength: 40,
+      maxLength: 100,
       minLength: 4
     },
     description: {
       type: String,
       required: true,
       minLength: 10,
-      maxLength: 100,
+      maxLength: 200,
     },
     content: {
       type: String,
@@ -51,7 +51,8 @@ const articleSchema = new Schema(
       minLength: 1,
       maxLength: 100,
     }
-  }
+  },
+  { versionKey: false }
 );
 
 module.exports = model('article', articleSchema);

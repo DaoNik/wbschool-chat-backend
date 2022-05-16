@@ -5,6 +5,7 @@ const groupChatsRouter = require("./groupChats");
 const usersRouter = require("./users");
 const auth = require("../middleware/auth");
 const { register, login } = require("../controllers/users");
+const articlesRouter = require('./article');
 
 router.get("/", (req, res) => {
   res.send("Hello");
@@ -42,10 +43,12 @@ router.post(
   login
 );
 
+router.use('/articles', articlesRouter)
 router.use(auth);
 
 router.use("/chats/privates", privateChatsRouter);
 router.use("/chats/groups", groupChatsRouter);
 router.use("/users", usersRouter);
+
 
 module.exports = router;

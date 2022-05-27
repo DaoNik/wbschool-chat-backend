@@ -1,14 +1,16 @@
-const Article = require('../models/Article');
+const Article = require("../models/Article");
 const NotFoundError = require("../errors/NotFoundError");
-const ValidationError = require('../errors/ValidationError')
+const ValidationError = require("../errors/ValidationError");
 const getArticles = (req, res, next) => {
-  Article.find({...req.query})
+  Article.find({ ...req.query })
     .then((articles) => {
       if (!articles) {
-        throw new NotFoundError("Нет статей! Кажется, мы снова снесли базу данных");
+        throw new NotFoundError(
+          "Нет статей! Кажется, мы снова снесли базу данных"
+        );
       }
       const newArticles = [];
-      articles.forEach(article => {
+      articles.forEach((article) => {
         const newArticle = article.toObject();
         delete newArticle.content;
         newArticles.push(newArticle);
@@ -21,7 +23,7 @@ const getArticles = (req, res, next) => {
 const getArticle = (req, res, next) => {
   const { id } = req.params;
   Article.findById(id)
-    .then(article => {
+    .then((article) => {
       if (!article) {
         throw new NotFoundError("Нет статьи с таким id!");
       }
@@ -36,7 +38,7 @@ const createArticle = (req, res, next) => {
     dateCreate: Date.now(),
     dateUpdate: Date.now(),
   })
-    .then(article => {
+    .then((article) => {
       res.send(article);
     })
     .catch((err) => {
@@ -49,18 +51,27 @@ const createArticle = (req, res, next) => {
 
 const updateArticle = (req, res, next) => {
   const { id } = req.params;
-  const { title, description, content, respondents, tags, category, authors } = req.body;
+  const { title, description, content, departments, tags, category, authors } =
+    req.body;
   const dateUpdate = Date.now();
   Article.findByIdAndUpdate(
     id,
     {
-      title, description, content, respondents, tags, category, authors, dateUpdate
+      title,
+      description,
+      content,
+      departments,
+      tags,
+      category,
+      authors,
+      dateUpdate,
     },
     {
-      runValidators: true, new: true
+      runValidators: true,
+      new: true,
     }
   )
-    .then(article => {
+    .then((article) => {
       res.send(article);
     })
     .catch(next);
@@ -69,7 +80,7 @@ const updateArticle = (req, res, next) => {
 const deleteArticle = (req, res, next) => {
   const { id } = req.params;
   Article.findByIdAndDelete(id)
-    .then(article => res.send(article.id))
+    .then((article) => res.send(article.id))
     .catch(next);
 };
 

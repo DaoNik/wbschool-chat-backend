@@ -7,7 +7,7 @@ const articleSchema = new Schema(
       type: String,
       required: true,
       maxLength: 100,
-      minLength: 4
+      minLength: 4,
     },
     description: {
       type: String,
@@ -33,12 +33,10 @@ const articleSchema = new Schema(
       required: true,
       default: [],
     },
-    respondents: {
+    departments: {
       type: [String],
       required: true,
-      default: [
-        "я не я, жопа не моя)",
-      ],
+      default: [],
     },
     tags: {
       type: [String],
@@ -50,9 +48,9 @@ const articleSchema = new Schema(
       required: true,
       minLength: 1,
       maxLength: 100,
-    }
+    },
   },
   { versionKey: false }
 );
 
-module.exports = model('article', articleSchema);
+module.exports = model("article", articleSchema);
